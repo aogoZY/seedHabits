@@ -5,7 +5,7 @@ import (
 	"time"
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
+	// _ "github.com/lib/pq"
 )
 
 
