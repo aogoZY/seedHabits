@@ -33,6 +33,24 @@ func main() {
 		}
 		
 	})
+	r.POST("/seed/user/register",func(c *gin.Context){
+		nickname:=c.PostForm("nickName")
+		password :=c.PostForm("password")
+		db:=connectDB()
+		res:=insertRegister(db,nickname,password)
+		fmt.Println(res)
+		if res!=nil{
+			c.JSON(200, gin.H{
+				"msg": "error",
+				"code": 1,
+			})
+		}else{
+			c.JSON(200,gin.H{
+				"msg":"success",
+				"code":0,
+			})
+		} 
+	})
 
 
 	r.Run() // listen and serve on 0.0.0.0:8080
@@ -101,6 +119,42 @@ func insert(db *sql.DB,name string,time string)error{
 		fmt.Println("insert success")
 		return nil
 	}
+}
+
+func insertRegister(db *sql.DB,name string,pwd string)error{
+	stmt,err:=db.Prepare("insert into register(name,password) values($1,$2)")
+	if err!=nil{
+		fmt.Println(err)
+		return err
+	}
+	_,err = stmt.Exec(name,pwd)
+	if err!=nil{
+		return err
+	}
+	return nil
+}
+
+func queryRegister(db *sql.DB,name string)(bool,error){
+	rows,err:=db.Query(" select name register where name=$1",name)
+
+	if err!= nil{
+		return false,err
+	}
+	defer rows.Close()
+
+	for rows.Next(){
+		err:= rows.Scan(&name)
+		if err!= nil{
+			return false,err
+		}
+	}
+
+	err = rows.Err()
+	if err!= nil{
+		return false,err
+	}
+
+	return true,nil
 }
 
 
