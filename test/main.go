@@ -69,8 +69,19 @@ func main() {
 		
 	})
 	r.POST("/seed/user/register",func(c *gin.Context){
-		nickname:=c.PostForm("nickName")
-		password :=c.PostForm("password")
+		var params Register
+		err := c.BindJSON(&params)
+		if err!=nil{
+			c.JSON(200, gin.H{
+				"msg": err,
+				"code": 1,
+			})
+			return
+		}
+		nickname:=params.Name
+		fmt.Printf("nickname;%s",nickname)
+		password:=params.Password
+		fmt.Printf("password:%s",password)
 		dbpg,_:=connectPgDB()
 		registerFlag,err:=queryRegister(dbpg,nickname)
 		if err!=nil{
@@ -203,13 +214,13 @@ func insert(db *sql.DB,name string,time string)error{
 // }
 
 
-type register struct{
+type Register struct{
 	Name string `json:"name"`
 	Password string `json:"password"`
 }
 
 func insertRegister(db *xorm.Engine,name string,pwd string)(bool,error){
-	var registerUser register
+	var registerUser Register
 	registerUser.Name=name
 	registerUser.Password=pwd
 	// register:=&Register_table{NickName:name,Password:pwd}
