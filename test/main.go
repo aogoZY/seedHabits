@@ -97,7 +97,7 @@ func main() {
 		}
 		if res{
 			c.JSON(200,gin.H{
-				"msg":"login in success!",
+				"msg":"register success!",
 				"code":0,
 			})
 		} 
