@@ -9,6 +9,7 @@ import (
 	"github.com/go-xorm/xorm"
 	"log"
 	"net/http"
+	"strings"
 
 )
 
@@ -43,12 +44,7 @@ func main() {
 	r.Use(Cors())
 
 	r.GET("/", func(c *gin.Context) {
-		db,err:=connectPgDB()
-		if err!=nil{
-			fmt.Println(err)
-		}
-		fmt.Println(db)
-		c.String(200, "Hello, 打卡成功")
+		c.String(200, "Hello, 凹沟,打卡成功")
 	})
 	r.GET("/user/:name", func(c *gin.Context) {
 		name := c.Param("name")
@@ -69,19 +65,44 @@ func main() {
 		
 	})
 	r.POST("/seed/user/register",func(c *gin.Context){
-		var params Register
-		err := c.BindJSON(&params)
+		var params User
+		err := c.ShouldBindJSON(&params)
 		if err!=nil{
 			c.JSON(200, gin.H{
-				"msg": err,
+				"msg": "输入参数有误",
 				"code": 1,
 			})
 			return
 		}
+		
+		
+
+		fmt.Printf("nickname:%s\n",params.Name)
+		fmt.Printf("pwd:%s\n",params.Password)
+
 		nickname:=params.Name
-		fmt.Printf("nickname;%s",nickname)
+		nickname=strings.Replace(nickname," ","",-1)
+		fmt.Println("len(nickname):",len(nickname))
+		if len(nickname) == 0{
+			c.JSON(200, gin.H{
+				"msg": "用户名不能为空",
+				"code": 1,
+			})
+			return
+		}
+	
+		fmt.Printf("nickname:%s",nickname)
 		password:=params.Password
+		password=strings.Replace(password," ","",-1)
 		fmt.Printf("password:%s",password)
+		if len(password) == 0{
+			fmt.Println("pwd null")
+			c.JSON(200, gin.H{
+				"msg": "密码不能为空",
+				"code": 1,
+			})
+			return
+		}
 		dbpg,_:=connectPgDB()
 		registerFlag,err:=queryRegister(dbpg,nickname)
 		if err!=nil{
@@ -99,6 +120,7 @@ func main() {
 			return
 		}
 		res,err:=insertRegister(dbpg,nickname,password)
+		
 		if err!=nil{
 			c.JSON(200, gin.H{
 				"msg": err,
@@ -214,13 +236,13 @@ func insert(db *sql.DB,name string,time string)error{
 // }
 
 
-type Register struct{
-	Name string `json:"name"`
+type User struct{
+	Name string `json:"name" `
 	Password string `json:"password"`
 }
 
 func insertRegister(db *xorm.Engine,name string,pwd string)(bool,error){
-	var registerUser Register
+	var registerUser User
 	registerUser.Name=name
 	registerUser.Password=pwd
 	// register:=&Register_table{NickName:name,Password:pwd}
@@ -238,9 +260,8 @@ func insertRegister(db *xorm.Engine,name string,pwd string)(bool,error){
 
 
 func queryRegister(db *xorm.Engine,name string)(bool,error){
-	has,err:=db.Table("register").Where("name=?",name).Exist()
+	has,err:=db.Table("user").Where("name=?",name).Exist()
 	if err!=nil{
-		fmt.Println(err)
 		return false,err
 	}
 	if has{
