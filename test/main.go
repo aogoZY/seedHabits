@@ -44,7 +44,7 @@ func main() {
 	r.Use(Cors())
 
 	r.GET("/", func(c *gin.Context) {
-		c.String(200, "Hello, 凹沟,打卡成功")
+		c.String(200, "Hello, aogo,打卡成功")
 	})
 	r.GET("/user/:name", func(c *gin.Context) {
 		name := c.Param("name")
