@@ -39,8 +39,6 @@ func query(db *sql.DB)(name string,time string,err error){
 		return "","",err
 	}
 	defer rows.Close()
-
-	if rows > 0{
 		for rows.Next(){
 			err:= rows.Scan(&name,&time)
 			if err!= nil{
@@ -54,8 +52,6 @@ func query(db *sql.DB)(name string,time string,err error){
 		}
 	
 		return name,time,nil
-	}else{
-		return "","",error.new("不存在")
 	}
 	
 }
