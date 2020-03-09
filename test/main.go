@@ -178,6 +178,11 @@ func main() {
 			})
 			return
 		}
+		c.JSON(200,gin.H{
+			"msg":"登录失败,用户名或密码不正确",
+			"code":1,
+	
+		})
 
 
 	})
