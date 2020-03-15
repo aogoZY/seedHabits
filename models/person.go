@@ -1,5 +1,0 @@
-package models
-
-func main(){
-
-}

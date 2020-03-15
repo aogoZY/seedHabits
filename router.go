@@ -1,1 +1,1 @@
-package seedHabits
+package main
