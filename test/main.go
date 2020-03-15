@@ -267,16 +267,50 @@ func main() {
 			fmt.Println(err)
 			c.JSON(200, gin.H{
 				"msg":  err,
-				"code": 0,
+				"code": 1,
 				"data": res,
 			})
 			return
 		}
 		c.JSON(200, gin.H{
 			"msg":  "你已经打卡了好多哇！",
-			"code": 1,
+			"code": 0,
 			"data": res,
 		})
+	})
+	r.POST("/habit/add", func(c *gin.Context) {
+		var params AddHabitParams
+		err := c.ShouldBindJSON(&params)
+		if err != nil {
+			fmt.Println(err)
+			c.JSON(200, gin.H{
+				"code": 1,
+				"msg":  err,
+			})
+		}
+		db, _ := connectPgDB()
+		res, err := InsertNewHabit(db, params.HabitName, params.Img)
+		fmt.Println(res)
+		if err != nil {
+			c.JSON(200, gin.H{
+				"code": 1,
+				"msg":  err,
+			})
+			return
+		}
+		err = InsertInfo(db, params, res)
+		if err != nil {
+			c.JSON(200, gin.H{
+				"code": 1,
+				"msg":  err,
+			})
+			return
+		}
+		c.JSON(200, gin.H{
+			"code": 0,
+			"msg":  "insert new habit successed!",
+		})
+		return
 	})
 
 	r.Run() // listen and serve on 0.0.0.0:8080
@@ -426,16 +460,19 @@ func insertUserHabitInfo(db *xorm.Engine, id int, time string) error {
 	userHabitInfos[0].HabitName = "记账"
 	userHabitInfos[0].UserId = id
 	userHabitInfos[0].CreateTime = time
+	userHabitInfos[0].HabitImg = "accounting"
 
 	userHabitInfos[1].HabitId = 5
 	userHabitInfos[1].HabitName = "打代码"
 	userHabitInfos[1].UserId = id
 	userHabitInfos[1].CreateTime = time
+	userHabitInfos[1].HabitImg = "coding"
 
 	userHabitInfos[2].HabitId = 7
 	userHabitInfos[2].HabitName = "读书"
 	userHabitInfos[2].UserId = id
 	userHabitInfos[2].CreateTime = time
+	userHabitInfos[2].HabitImg = "reading"
 
 	affected, err := db.Insert(&userHabitInfos)
 	if err != nil {
@@ -476,6 +513,7 @@ func getHabitListByUserId(db *xorm.Engine, userId int) (res []UserHabits, err er
 	for _, item := range HabitList {
 		userHabit.Id = item.HabitId
 		userHabit.Name = item.HabitName
+		userHabit.Img = item.HabitImg
 		res = append(res, userHabit)
 	}
 	return res, nil
@@ -551,10 +589,10 @@ type HabitHistoryInfo struct {
 
 type HabitHistoryRes struct {
 	HabitHistoryInfo
-	Day int `json:"day`
+	Day int `json:"day"`
 }
 
-func GetHistoryByUserIdAndHabitId(db *xorm.Engine, user_id int, habit_id int) (res []HabitHistoryRes ,err error) {
+func GetHistoryByUserIdAndHabitId(db *xorm.Engine, user_id int, habit_id int) (res []HabitHistoryRes, err error) {
 	var habitHistoryInfo []HabitHistoryInfo
 	var habitHistoryItem HabitHistoryRes
 	//var habitHistoryRes []HabitHistoryRes
@@ -564,13 +602,56 @@ func GetHistoryByUserIdAndHabitId(db *xorm.Engine, user_id int, habit_id int) (r
 		return res, err
 	}
 	length := len(habitHistoryInfo)
-	for i, item := range habitHistoryInfo{
+	for i, item := range habitHistoryInfo {
 		day := length - i
 		habitHistoryItem.Day = day
-		habitHistoryItem.HabitHistoryInfo=item
+		habitHistoryItem.HabitHistoryInfo = item
 		fmt.Println(habitHistoryItem)
-		res = append(res,habitHistoryItem)
+		res = append(res, habitHistoryItem)
 	}
 	return res, nil
 
+}
+
+type AddHabitParams struct {
+	UserId    int    `json:"user_id"`
+	HabitName string `json:"habit_name"`
+	Img       string `json:"img"`
+}
+
+type Habit struct {
+	HabitId   int    `json:"habit_id"`
+	HabitImg  string `json:"habit_img"`
+	HabitName string `json:"habit_name"`
+}
+
+func InsertNewHabit(db *xorm.Engine, habitName string, img string)(int, error) {
+
+
+	sql := "insert into habit (habit_img,habit_name) values (?,?)"
+	res, err := db.Exec(sql, img, habitName)
+
+	//habit := Habit{HabitName:habitName,HabitImg:img}
+	//affected, err := db.Insert(habit).Omit("habit_id")
+	if err != nil{
+		fmt.Println(err)
+		return 0,err
+	}
+	fmt.Println(res)
+	return 0,nil
+}
+
+func InsertInfo(db *xorm.Engine, params AddHabitParams, id int)error{
+	tNow := time.Now()
+	timeNow := tNow.Format("2006-01-02 15:04:05")
+	info := Info{UserId:params.UserId,HabitId:id,CreateTime:timeNow,HabitName:params.HabitName,HabitImg:params.Img}
+	affected,err := db.Insert(&info)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	if affected > 0 {
+		return nil
+	}
+	return errors.New("insert failed")
 }
