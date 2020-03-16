@@ -287,10 +287,11 @@ func main() {
 				"code": 1,
 				"msg":  err,
 			})
+			return
 		}
 		db, _ := connectPgDB()
 		res, err := InsertNewHabit(db, params.HabitName, params.Img)
-		fmt.Println(res)
+		fmt.Println("habit_id",res)
 		if err != nil {
 			c.JSON(200, gin.H{
 				"code": 1,
@@ -625,11 +626,11 @@ type Habit struct {
 	HabitName string `json:"habit_name"`
 }
 
-func InsertNewHabit(db *xorm.Engine, habitName string, img string)(int, error) {
+func InsertNewHabit(db *xorm.Engine, habitName string, img string)(res int,err error) {
 
 
 	sql := "insert into habit (habit_img,habit_name) values (?,?)"
-	res, err := db.Exec(sql, img, habitName)
+	_, err = db.Exec(sql, img, habitName)
 
 	//habit := Habit{HabitName:habitName,HabitImg:img}
 	//affected, err := db.Insert(habit).Omit("habit_id")
@@ -637,8 +638,17 @@ func InsertNewHabit(db *xorm.Engine, habitName string, img string)(int, error) {
 		fmt.Println(err)
 		return 0,err
 	}
-	fmt.Println(res)
-	return 0,nil
+	var habit_id int
+	has, err := db.Table("habit").Cols("habit_id").Where("habit_name=? and habit_img = ?",habitName, img).Get(&habit_id)
+
+	if err != nil{
+		fmt.Println(err)
+		return 0, err
+	}
+	if has{
+		return habit_id,nil
+	}
+	return 0,errors.New("新建习惯失败")
 }
 
 func InsertInfo(db *xorm.Engine, params AddHabitParams, id int)error{
