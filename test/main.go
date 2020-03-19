@@ -291,7 +291,7 @@ func main() {
 		}
 		db, _ := connectPgDB()
 		res, err := InsertNewHabit(db, params.HabitName, params.Img)
-		fmt.Println("habit_id",res)
+		fmt.Println("habit_id", res)
 		if err != nil {
 			c.JSON(200, gin.H{
 				"code": 1,
@@ -312,6 +312,70 @@ func main() {
 			"msg":  "insert new habit successed!",
 		})
 		return
+	})
+	r.GET("/bill/label", func(c *gin.Context) {
+		pg, _ := connectPgDB()
+		res, err := GetLableList(pg)
+		if err != nil {
+			fmt.Println(err)
+			c.JSON(200, gin.H{
+				"msg":  err,
+				"code": 1,
+			})
+			return
+		}
+		c.JSON(200, gin.H{
+			"msg":  "ok",
+			"code": 0,
+			"data": res,
+		})
+
+	})
+	r.POST("bill/add", func(c *gin.Context) {
+		var Params BillRecord
+		err := c.BindJSON(&Params)
+		if err != nil {
+			fmt.Println(err)
+			c.JSON(200, gin.H{
+				"code": 200,
+				"msg":  err,
+			})
+			return
+		}
+		db, _ := connectPgDB()
+		err = InsertBillRecord(db, Params)
+		if err != nil {
+			fmt.Println(err)
+			c.JSON(200, gin.H{
+				"code": 200,
+				"msg":  err,
+			})
+			return
+		}
+		c.JSON(200, gin.H{
+			"code": 200,
+			"msg":  "insert bill record successed !",
+		})
+
+	})
+	r.GET("/account/rest", func(c *gin.Context) {
+		userIdStr := c.Query("user_id")
+		pg, _ := connectPgDB()
+		user_id, err := strconv.Atoi(userIdStr)
+		fmt.Println(user_id)
+		res, err := GetAccountRest(pg, user_id)
+		if err != nil {
+			c.JSON(200, gin.H{
+				"code": 1,
+				"msg":  err,
+			})
+			return
+		}
+		c.JSON(200, gin.H{
+			"code": 0,
+			"msg":  "successed",
+			"data": res,
+		})
 	})
 
 	r.Run() // listen and serve on 0.0.0.0:8080
@@ -626,36 +690,35 @@ type Habit struct {
 	HabitName string `json:"habit_name"`
 }
 
-func InsertNewHabit(db *xorm.Engine, habitName string, img string)(res int,err error) {
-
+func InsertNewHabit(db *xorm.Engine, habitName string, img string) (res int, err error) {
 
 	sql := "insert into habit (habit_img,habit_name) values (?,?)"
 	_, err = db.Exec(sql, img, habitName)
 
 	//habit := Habit{HabitName:habitName,HabitImg:img}
 	//affected, err := db.Insert(habit).Omit("habit_id")
-	if err != nil{
-		fmt.Println(err)
-		return 0,err
-	}
-	var habit_id int
-	has, err := db.Table("habit").Cols("habit_id").Where("habit_name=? and habit_img = ?",habitName, img).Get(&habit_id)
-
-	if err != nil{
+	if err != nil {
 		fmt.Println(err)
 		return 0, err
 	}
-	if has{
-		return habit_id,nil
+	var habit_id int
+	has, err := db.Table("habit").Cols("habit_id").Where("habit_name=? and habit_img = ?", habitName, img).Get(&habit_id)
+
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
 	}
-	return 0,errors.New("新建习惯失败")
+	if has {
+		return habit_id, nil
+	}
+	return 0, errors.New("新建习惯失败")
 }
 
-func InsertInfo(db *xorm.Engine, params AddHabitParams, id int)error{
+func InsertInfo(db *xorm.Engine, params AddHabitParams, id int) error {
 	tNow := time.Now()
 	timeNow := tNow.Format("2006-01-02 15:04:05")
-	info := Info{UserId:params.UserId,HabitId:id,CreateTime:timeNow,HabitName:params.HabitName,HabitImg:params.Img}
-	affected,err := db.Insert(&info)
+	info := Info{UserId: params.UserId, HabitId: id, CreateTime: timeNow, HabitName: params.HabitName, HabitImg: params.Img}
+	affected, err := db.Insert(&info)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -664,4 +727,105 @@ func InsertInfo(db *xorm.Engine, params AddHabitParams, id int)error{
 		return nil
 	}
 	return errors.New("insert failed")
+}
+
+type Label struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+	Img  string `json:"img"`
+}
+
+func GetLableList(db *xorm.Engine) (res []Label, err error) {
+	err = db.Find(&res)
+	if err != nil {
+		fmt.Println(err)
+		return res, err
+	}
+	return res, nil
+
+}
+
+type BillRecord struct {
+	UserId      int       `json:"user_id"`
+	Type        int       `json:"type"`       // 0 支出 1 收入
+	AccountId   int       `json:"account_id"` // 1、微信 2、 支付宝 3、银行卡
+	AccountName string    `json:"account_name"`
+	Money       float64   `json:"money"`
+	LabelId     int       `json:"label_id"`
+	LabelName   string    `json:"label_name"`
+	Comment     string    `json:"comment"`
+	CreatTime   time.Time `xorm:"create_time created" json:"creat_time" description:"创建时间"`
+}
+
+func InsertBillRecord(db *xorm.Engine, params BillRecord) (err error) {
+	affected, err := db.Insert(&params)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	if affected > 0 {
+		return nil
+	}
+	return errors.New("insert not successed!")
+
+}
+
+type AccountRestResult struct {
+	AccountList []AccountPayment `json:"account_list"`
+	TotalRest   float64          `json:"total_rest"`
+}
+
+type AccountPayment struct {
+	Name string  `json:"name"`
+	Img  string  `json:"img"`
+	Rest float64 `json:"rest"`
+}
+
+var PaymentList = []int{1, 2, 3} // 1、微信 2、支付宝 3、银行卡
+
+const (
+	Pay    int = 1
+	Income int = 0
+)
+
+type Account struct {
+	SampleId    int    `json:"sample_id"`
+	AccountName string `json:"account_name"`
+	AccountImg  string `json:"account_img"`
+}
+
+func GetAccountRest(db *xorm.Engine, user_id int) (res AccountRestResult, err error) {
+	billRecord := new(BillRecord)
+	fmt.Printf("billRecord:%+v\n", billRecord)
+	var accountPayment AccountPayment
+	var accountPaymentList []AccountPayment
+	var total float64
+	for _, paymentItem := range PaymentList {
+		fmt.Println(paymentItem)
+		PayMoney, err := db.Where("account_id = ? and type = ? and user_id = ?", paymentItem, Income, user_id).Sum(billRecord, "money")
+		fmt.Println(PayMoney)
+		if err != nil {
+			fmt.Println(err)
+			return res, err
+		}
+		GetMoney, err := db.Where("account_id = ? and type = ? and user_id = ?", paymentItem, Pay, user_id).Sum(billRecord, "money")
+		fmt.Println(GetMoney)
+		RestbyPaymentItem := GetMoney - PayMoney
+		fmt.Println(RestbyPaymentItem)
+		accountPayment.Rest = RestbyPaymentItem
+		account := &Account{SampleId: paymentItem}
+		_, err = db.Get(account)
+		if err != nil {
+			fmt.Println(err)
+			return res, err
+		}
+
+		accountPayment.Img = account.AccountImg
+		accountPayment.Name = account.AccountName
+		accountPaymentList = append(accountPaymentList, accountPayment)
+		total += RestbyPaymentItem
+	}
+	res.AccountList = accountPaymentList
+	res.TotalRest = total
+	return res, nil
 }
