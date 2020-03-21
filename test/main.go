@@ -42,23 +42,23 @@ func main() {
 	r.Use(Cors())
 
 	r.GET("/", func(c *gin.Context) {
-		c.String(200, "Hello, aogo,打卡成功")
+		c.String(0, "Hello, aogo,打卡成功")
 	})
 	r.GET("/user/:name", func(c *gin.Context) {
 		name := c.Param("name")
 		fmt.Println(name)
 		tNow := time.Now()
-		timeNow := tNow.Format("2006-01-02 15:04:05")
+		timeNow := tNow.Format("06-01-02 15:04:05")
 		db := connectDB()
 		queryName, queryTime, err := query(db, name)
 		if err != nil {
-			c.String(200, "err:%s", err)
+			c.String(0, "err:%s", err)
 		}
 		if queryName == "" {
 			insert(db, name, timeNow)
-			c.String(200, "Hello %s login success", name)
+			c.String(0, "Hello %s login success", name)
 		} else {
-			c.String(200, "%s hava signed at %s", queryName, queryTime)
+			c.String(0, "%s hava signed at %s", queryName, queryTime)
 		}
 
 	})
@@ -66,7 +66,7 @@ func main() {
 		var params Users
 		err := c.ShouldBindJSON(&params)
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  "绑定失败",
 				"code": 1,
 			})
@@ -78,7 +78,7 @@ func main() {
 		nickname := params.Name
 		nickname = strings.Replace(nickname, " ", "", -1)
 		if len(nickname) == 0 {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  "用户名不能为空",
 				"code": 1,
 			})
@@ -87,7 +87,7 @@ func main() {
 		password := params.Password
 		password = strings.Replace(password, " ", "", -1)
 		if len(password) == 0 {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  "密码不能为空",
 				"code": 1,
 			})
@@ -96,14 +96,14 @@ func main() {
 		dbpg, _ := connectPgDB()
 		registerFlag, err := queryRegister(dbpg, nickname)
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  err,
 				"code": 1,
 			})
 			return
 		}
 		if registerFlag {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  "u have registered!",
 				"code": 1,
 			})
@@ -114,24 +114,24 @@ func main() {
 		fmt.Println("insert register UserId:", UserId)
 		fmt.Println("inser register err:", err)
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  err,
 				"code": 1,
 			})
 			return
 		}
 		tNow := time.Now()
-		timeNow := tNow.Format("2006-01-02 15:04:05")
+		timeNow := tNow.Format("06-01-02 15:04:05")
 		err = insertUserHabitInfo(dbpg, UserId, timeNow)
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  err,
 				"code": 1,
 			})
 			return
 		}
 		if res {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  "register success!",
 				"code": 0,
 			})
@@ -142,14 +142,14 @@ func main() {
 		var params Users
 		err := c.ShouldBindJSON(&params)
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"code": 1,
 				"msg":  err,
 			})
 		}
 		name := strings.Replace(params.Name, " ", "", -1)
 		if name == "" {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  "用户名不能为空",
 				"code": 1,
 			})
@@ -157,7 +157,7 @@ func main() {
 		}
 		password := strings.Replace(params.Password, " ", "", -1)
 		if password == "" {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  "密码不能为空",
 				"code": 1,
 			})
@@ -166,21 +166,21 @@ func main() {
 		dbpg, _ := connectPgDB()
 		queryLoginRes, err := queryLoginIn(dbpg, name, password)
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  err,
 				"code": 1,
 			})
 			return
 		}
 		if queryLoginRes > 0 {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  "登录成功",
 				"code": 0,
 				"data": gin.H{"userId": queryLoginRes},
 			})
 			return
 		}
-		c.JSON(200, gin.H{
+		c.JSON(0, gin.H{
 			"msg":  "登录失败,用户名或密码不正确",
 			"code": 1,
 		})
@@ -194,13 +194,13 @@ func main() {
 		dbpg, _ := connectPgDB()
 		res, err := getHabitListByUserId(dbpg, userId)
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  err,
 				"code": 1,
 			})
 			return
 		}
-		c.JSON(200, gin.H{
+		c.JSON(0, gin.H{
 			"msg":  "successed",
 			"code": 0,
 			"data": res,
@@ -212,7 +212,7 @@ func main() {
 		err := c.ShouldBindJSON(&param)
 		if err != nil {
 			fmt.Println(err)
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  err,
 				"code": 1,
 			})
@@ -222,7 +222,7 @@ func main() {
 		fmt.Println("user_id:", param.Detail.UserId)
 		dbpg, _ := connectPgDB()
 		NTime := time.Now()
-		punchTime := NTime.Format("2006-01-02 15:04:05")
+		punchTime := NTime.Format("06-01-02 15:04:05")
 		param.Detail.CreateTime = punchTime
 		fmt.Printf("%+v", param)
 		fmt.Println(param.PunchFlag)
@@ -233,7 +233,7 @@ func main() {
 				fmt.Println(err)
 				return
 			}
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  "update punch info successed!",
 				"code": 0,
 			})
@@ -242,13 +242,13 @@ func main() {
 		err = InserDailyDetail(dbpg, param.Detail)
 		if err != nil {
 			fmt.Println(err)
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  err,
 				"code": 1,
 			})
 			return
 		}
-		c.JSON(200, gin.H{
+		c.JSON(0, gin.H{
 			"msg":  "insert punch info successed! Keep moving on!",
 			"code": 0,
 		})
@@ -265,14 +265,14 @@ func main() {
 		res, err := GetHistoryByUserIdAndHabitId(db, user_id, habit_id)
 		if err != nil {
 			fmt.Println(err)
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  err,
 				"code": 1,
 				"data": res,
 			})
 			return
 		}
-		c.JSON(200, gin.H{
+		c.JSON(0, gin.H{
 			"msg":  "你已经打卡了好多哇！",
 			"code": 0,
 			"data": res,
@@ -283,7 +283,7 @@ func main() {
 		err := c.ShouldBindJSON(&params)
 		if err != nil {
 			fmt.Println(err)
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"code": 1,
 				"msg":  err,
 			})
@@ -293,7 +293,7 @@ func main() {
 		res, err := InsertNewHabit(db, params.HabitName, params.Img)
 		fmt.Println("habit_id", res)
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"code": 1,
 				"msg":  err,
 			})
@@ -301,13 +301,13 @@ func main() {
 		}
 		err = InsertInfo(db, params, res)
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"code": 1,
 				"msg":  err,
 			})
 			return
 		}
-		c.JSON(200, gin.H{
+		c.JSON(0, gin.H{
 			"code": 0,
 			"msg":  "insert new habit successed!",
 		})
@@ -318,13 +318,13 @@ func main() {
 		res, err := GetLableList(pg)
 		if err != nil {
 			fmt.Println(err)
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"msg":  err,
 				"code": 1,
 			})
 			return
 		}
-		c.JSON(200, gin.H{
+		c.JSON(0, gin.H{
 			"msg":  "ok",
 			"code": 0,
 			"data": res,
@@ -336,8 +336,8 @@ func main() {
 		err := c.BindJSON(&Params)
 		if err != nil {
 			fmt.Println(err)
-			c.JSON(200, gin.H{
-				"code": 200,
+			c.JSON(0, gin.H{
+				"code": 0,
 				"msg":  err,
 			})
 			return
@@ -346,14 +346,14 @@ func main() {
 		err = InsertBillRecord(db, Params)
 		if err != nil {
 			fmt.Println(err)
-			c.JSON(200, gin.H{
-				"code": 200,
+			c.JSON(0, gin.H{
+				"code": 0,
 				"msg":  err,
 			})
 			return
 		}
-		c.JSON(200, gin.H{
-			"code": 200,
+		c.JSON(0, gin.H{
+			"code": 0,
 			"msg":  "insert bill record successed !",
 		})
 
@@ -365,16 +365,62 @@ func main() {
 		fmt.Println(user_id)
 		res, err := GetAccountRest(pg, user_id)
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(0, gin.H{
 				"code": 1,
 				"msg":  err,
 			})
 			return
 		}
-		c.JSON(200, gin.H{
+		c.JSON(0, gin.H{
 			"code": 0,
 			"msg":  "successed",
 			"data": res,
+		})
+	})
+	r.GET("/bill/item", func(c *gin.Context) {
+		userIdStr := c.Query("user_id")
+		user_id, _ := strconv.Atoi(userIdStr)
+		date := c.Query("date")
+		accountIdStr := c.Query("account_id")
+		account_id, _ := strconv.Atoi(accountIdStr)
+		account_name := c.Query("account_name")
+		db, _ := connectPgDB()
+		res, err := GetItemListByMonthAndAccountName(db, user_id, date, account_id, account_name)
+		if err != nil {
+			c.JSON(0, gin.H{
+				"code": 1,
+				"msg":  err,
+			})
+			return
+		}
+		c.JSON(0, gin.H{
+			"code": 0,
+			"msg":  "successed!",
+			"data": res,
+		})
+	})
+	r.GET("/bill/pie", func(c *gin.Context) {
+		userIdStr := c.Query("user_id")
+		date := c.Query("date")
+		searchTypeStr := c.Query("search_type")
+		pay := c.Query("pay")
+		user_id,_ := strconv.Atoi(userIdStr)
+		search_type,_ := strconv.Atoi(searchTypeStr)
+		fmt.Println(user_id,date,search_type,pay)
+		pg,_ := connectPgDB()
+		res,err := GetPieByType(pg,user_id,date,search_type)
+		if err !=nil {
+			fmt.Println(err)
+			c.JSON(0,gin.H{
+				"code": 1,
+				"msg" :err,
+			})
+			return
+		}
+		c.JSON(0,gin.H{
+			"code" : 0,
+			"msg" : "successed",
+			"data" : res,
 		})
 	})
 
@@ -637,8 +683,8 @@ func UpdateDailyDetail(db *xorm.Engine, params Detail) error {
 	//res, err := engine.Exec(sql, 1, "xorm")
 	//
 	time := time.Now()
-	today := time.Format("2006-01-02")
-	fmt.Printf("day:%v\n",today)
+	today := time.Format("06-01-02")
+	fmt.Printf("day:%v\n", today)
 	sql := "update detail set create_time = ?, word = ?,img = ? where user_id = ? and habit_id = ? and habit_name = ? and create_time > ?"
 	_, err := db.Exec(sql, params.CreateTime, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName, today)
 
@@ -723,8 +769,7 @@ func InsertNewHabit(db *xorm.Engine, habitName string, img string) (res int, err
 
 func InsertInfo(db *xorm.Engine, params AddHabitParams, id int) error {
 	tNow := time.Now()
-	timeNow := tNow.Format("2006-01-02 15:04:05")
-
+	timeNow := tNow.Format("06-01-02 15:04:05")
 
 	info := Info{UserId: params.UserId, HabitId: id, CreateTime: timeNow, HabitName: params.HabitName, HabitImg: params.Img}
 	affected, err := db.Insert(&info)
@@ -754,7 +799,7 @@ func GetLableList(db *xorm.Engine) (res []Label, err error) {
 
 }
 
-type BillRecord struct {
+type BillRecord struct{
 	UserId      int       `json:"user_id"`
 	Type        int       `json:"type"`       // 0 支出 1 收入
 	AccountId   int       `json:"account_id"` // 1、微信 2、 支付宝 3、银行卡
@@ -763,7 +808,7 @@ type BillRecord struct {
 	LabelId     int       `json:"label_id"`
 	LabelName   string    `json:"label_name"`
 	Comment     string    `json:"comment"`
-	CreatTime   time.Time `xorm:"create_time created" json:"creat_time" description:"创建时间"`
+	CreatTime   time.Time `xorm:"create_time created" json:"create_time" description:"创建时间"`
 }
 
 func InsertBillRecord(db *xorm.Engine, params BillRecord) (err error) {
@@ -793,8 +838,8 @@ type AccountPayment struct {
 var PaymentList = []int{1, 2, 3} // 1、微信 2、支付宝 3、银行卡
 
 const (
-	Pay    int = 1
-	Income int = 0
+	Income    int = 1    //收入
+	Pay int = 0         //支出
 )
 
 type Account struct {
@@ -811,14 +856,14 @@ func GetAccountRest(db *xorm.Engine, user_id int) (res AccountRestResult, err er
 	var total float64
 	for _, paymentItem := range PaymentList {
 		fmt.Println(paymentItem)
-		PayMoney, err := db.Where("account_id = ? and type = ? and user_id = ?", paymentItem, Income, user_id).Sum(billRecord, "money")
-		fmt.Println(PayMoney)
+		GetMoney, err := db.Where("account_id = ? and type = ? and user_id = ?", paymentItem, Income, user_id).Sum(billRecord, "money")
+		fmt.Println(GetMoney)
 		if err != nil {
 			fmt.Println(err)
 			return res, err
 		}
-		GetMoney, err := db.Where("account_id = ? and type = ? and user_id = ?", paymentItem, Pay, user_id).Sum(billRecord, "money")
-		fmt.Println(GetMoney)
+		PayMoney, err := db.Where("account_id = ? and type = ? and user_id = ?", paymentItem, Pay, user_id).Sum(billRecord, "money")
+		fmt.Println(PayMoney)
 		RestbyPaymentItem := GetMoney - PayMoney
 		fmt.Println(RestbyPaymentItem)
 		accountPayment.Rest = RestbyPaymentItem
@@ -837,4 +882,68 @@ func GetAccountRest(db *xorm.Engine, user_id int) (res AccountRestResult, err er
 	res.AccountList = accountPaymentList
 	res.TotalRest = total
 	return res, nil
+}
+
+type GetItemByAccountNameRes struct {
+	Rest     float64    `json:"rest"`
+	Income   float64    `json:"income"`
+	Pay      float64    `json:"pay"`
+	ItemList []BillRecord `json:"item_list"`
+}
+
+func GetItemListByMonthAndAccountName(db *xorm.Engine, user_id int, date string, account_id int, account_name string) (res GetItemByAccountNameRes, err error) {
+	billRecord := make([]BillRecord, 0)
+	index := strings.Index(date, "-")
+	year := date[:index]
+	month := date[index+1:]
+	yearInt, _ := strconv.Atoi(year)
+	monthInt, _ := strconv.Atoi(month)
+
+	firstOfMonth := time.Date(yearInt, time.Month(monthInt), 1, 0, 0, 0, 0, time.Local)
+	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
+	fmt.Printf("lastMonth: %v\n", lastOfMonth)
+
+	err = db.Desc("create_time").Where("user_id =? and account_id = ? and account_name = ? and create_time > ? and create_time < ?", user_id, account_id, account_name, date, lastOfMonth).Find(&billRecord)
+	if err != nil {
+		fmt.Println(err)
+		return res, err
+	}
+	fmt.Printf(" billRecord: %+v", billRecord)
+	fmt.Println("----------分割线------------")
+	res.ItemList = billRecord
+	bill := new(BillRecord)
+	pay,err := db.Where("user_id =? and account_id = ? and account_name =? and create_time > ? and create_time < ?  and type = ?",user_id,account_id,account_name,date,lastOfMonth, Pay).Sum(bill,"money")
+	fmt.Printf("pay: %v\n", pay)
+	income,err := db.Where("user_id =? and account_id = ? and account_name =? and create_time > ? and create_time < ?  and type = ?",user_id,account_id,account_name,date,lastOfMonth, Income).Sum(bill,"money")
+	fmt.Printf("income: %v\n",income)
+	res.Income = income
+	res.Pay = pay
+	res.Rest = income - pay
+	return res, nil
+}
+
+func GetRearchWayById(id int)(value string){
+	if id == 0{
+		return "account_id"
+	}else if id == 1{
+		return "label_id"
+	}else if id == 2{
+		return "comment"
+	}else {
+		return "not supported now!"
+	}
+}
+
+func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int )(res, err error){
+	search_field := GetRearchWayById(search_type)
+	fmt.Println(search_field)
+	sql := fmt.Sprintf("select %s,sum(money) from bill_record where user_id =%v and type = %v group by(%s)",search_field,user_id,0,search_field)
+	fmt.Println(sql)
+
+	//select account_name,sum(money) from  bill_record where user_id = 1 and type = 0 group by(account_name);
+	//
+	//	pg.GroupBy("account_id").Find(&billRecord)
+
+
+	return nil, nil
 }
