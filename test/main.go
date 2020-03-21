@@ -636,13 +636,20 @@ func UpdateDailyDetail(db *xorm.Engine, params Detail) error {
 	//sql ="update user set age = ? where name = ?"
 	//res, err := engine.Exec(sql, 1, "xorm")
 	//
-	sql := "update detail set create_time = ?, word = ?,img = ? where user_id = ? and habit_id = ? and habit_name = ?"
-	res, err := db.Exec(sql, params.CreateTime, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName)
+	time := time.Now()
+	today := time.Format("2006-01-02")
+	fmt.Printf("day:%v\n",today)
+	sql := "update detail set create_time = ?, word = ?,img = ? where user_id = ? and habit_id = ? and habit_name = ? and create_time > ?"
+	_, err := db.Exec(sql, params.CreateTime, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName, today)
+
+	//sql_2 := "update user set age = ? where name = ?"
+	//affected, err := engine.Sql(sql_2, 1, "xorm").Execute()
+
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-	fmt.Printf("update detail res:%s", res)
+
 	return nil
 }
 
@@ -717,6 +724,8 @@ func InsertNewHabit(db *xorm.Engine, habitName string, img string) (res int, err
 func InsertInfo(db *xorm.Engine, params AddHabitParams, id int) error {
 	tNow := time.Now()
 	timeNow := tNow.Format("2006-01-02 15:04:05")
+
+
 	info := Info{UserId: params.UserId, HabitId: id, CreateTime: timeNow, HabitName: params.HabitName, HabitImg: params.Img}
 	affected, err := db.Insert(&info)
 	if err != nil {
