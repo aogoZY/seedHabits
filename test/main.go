@@ -403,24 +403,26 @@ func main() {
 		userIdStr := c.Query("user_id")
 		date := c.Query("date")
 		searchTypeStr := c.Query("search_type")
-		pay := c.Query("pay")
-		user_id,_ := strconv.Atoi(userIdStr)
-		search_type,_ := strconv.Atoi(searchTypeStr)
-		fmt.Println(user_id,date,search_type,pay)
-		pg,_ := connectPgDB()
-		res,err := GetPieByType(pg,user_id,date,search_type)
-		if err !=nil {
+		payOrGetStr := c.Query("pay")
+		user_id, _ := strconv.Atoi(userIdStr)
+		search_type, _ := strconv.Atoi(searchTypeStr)
+		PayOrGet, _ := strconv.Atoi(payOrGetStr)
+
+		fmt.Println(user_id, date, search_type, PayOrGet)
+		pg, _ := connectPgDB()
+		res, err := GetPieByType(pg, user_id, date, search_type, PayOrGet)
+		if err != nil {
 			fmt.Println(err)
-			c.JSON(0,gin.H{
+			c.JSON(0, gin.H{
 				"code": 1,
-				"msg" :err,
+				"msg":  err,
 			})
 			return
 		}
-		c.JSON(0,gin.H{
-			"code" : 0,
-			"msg" : "successed",
-			"data" : res,
+		c.JSON(0, gin.H{
+			"code": 0,
+			"msg":  "successed",
+			"data": res,
 		})
 	})
 
@@ -719,6 +721,7 @@ func GetHistoryByUserIdAndHabitId(db *xorm.Engine, user_id int, habit_id int) (r
 		fmt.Println(err)
 		return res, err
 	}
+	fmt.Println(habitHistoryInfo)
 	length := len(habitHistoryInfo)
 	for i, item := range habitHistoryInfo {
 		day := length - i
@@ -799,7 +802,7 @@ func GetLableList(db *xorm.Engine) (res []Label, err error) {
 
 }
 
-type BillRecord struct{
+type BillRecord struct {
 	UserId      int       `json:"user_id"`
 	Type        int       `json:"type"`       // 0 支出 1 收入
 	AccountId   int       `json:"account_id"` // 1、微信 2、 支付宝 3、银行卡
@@ -838,8 +841,8 @@ type AccountPayment struct {
 var PaymentList = []int{1, 2, 3} // 1、微信 2、支付宝 3、银行卡
 
 const (
-	Income    int = 1    //收入
-	Pay int = 0         //支出
+	Income int = 1 //收入
+	Pay    int = 0 //支出
 )
 
 type Account struct {
@@ -885,9 +888,9 @@ func GetAccountRest(db *xorm.Engine, user_id int) (res AccountRestResult, err er
 }
 
 type GetItemByAccountNameRes struct {
-	Rest     float64    `json:"rest"`
-	Income   float64    `json:"income"`
-	Pay      float64    `json:"pay"`
+	Rest     float64      `json:"rest"`
+	Income   float64      `json:"income"`
+	Pay      float64      `json:"pay"`
 	ItemList []BillRecord `json:"item_list"`
 }
 
@@ -912,38 +915,89 @@ func GetItemListByMonthAndAccountName(db *xorm.Engine, user_id int, date string,
 	fmt.Println("----------分割线------------")
 	res.ItemList = billRecord
 	bill := new(BillRecord)
-	pay,err := db.Where("user_id =? and account_id = ? and account_name =? and create_time > ? and create_time < ?  and type = ?",user_id,account_id,account_name,date,lastOfMonth, Pay).Sum(bill,"money")
+	pay, err := db.Where("user_id =? and account_id = ? and account_name =? and create_time > ? and create_time < ?  and type = ?", user_id, account_id, account_name, date, lastOfMonth, Pay).Sum(bill, "money")
 	fmt.Printf("pay: %v\n", pay)
-	income,err := db.Where("user_id =? and account_id = ? and account_name =? and create_time > ? and create_time < ?  and type = ?",user_id,account_id,account_name,date,lastOfMonth, Income).Sum(bill,"money")
-	fmt.Printf("income: %v\n",income)
+	income, err := db.Where("user_id =? and account_id = ? and account_name =? and create_time > ? and create_time < ?  and type = ?", user_id, account_id, account_name, date, lastOfMonth, Income).Sum(bill, "money")
+	fmt.Printf("income: %v\n", income)
 	res.Income = income
 	res.Pay = pay
 	res.Rest = income - pay
 	return res, nil
 }
 
-func GetRearchWayById(id int)(value string){
-	if id == 0{
-		return "account_id"
-	}else if id == 1{
-		return "label_id"
-	}else if id == 2{
+func GetRearchWayById(id int) (value string) {
+	if id == 0 {
+		return "account_name"
+	} else if id == 1 {
+		return "label_name"
+	} else if id == 2 {
 		return "comment"
-	}else {
+	} else {
 		return "not supported now!"
 	}
 }
 
-func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int )(res, err error){
+type PieRes struct {
+	Name    string  `json:"name"`
+	Value   float64 `json:"value"`
+	Percent float64 `json:"percent"`
+}
+
+func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int,PayOrGet int) (res []PieRes, err error) {
+	index := strings.Index(date, "-")
+	year := date[:index]
+	month := date[index+1:]
+	yearInt, _ := strconv.Atoi(year)
+	monthInt, _ := strconv.Atoi(month)
+
+	firstOfMonth := time.Date(yearInt, time.Month(monthInt), 1, 0, 0, 0, 0, time.Local)
+	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
+	fmt.Printf("lastMonth:%s",lastOfMonth)
+	lastofMonthDay := lastOfMonth.Format("2006-01-02")
+	fmt.Printf("lastofMonthDay:%s",lastofMonthDay)
+	lastTime := lastofMonthDay + " 23:59:59"
+	fmt.Printf("lasttime:%s\n",lastTime)
+
+
 	search_field := GetRearchWayById(search_type)
 	fmt.Println(search_field)
-	sql := fmt.Sprintf("select %s,sum(money) from bill_record where user_id =%v and type = %v group by(%s)",search_field,user_id,0,search_field)
+	billRecord := new(BillRecord)
+	pay, err := pg.Where("user_id =? and type = ? and create_time < ? and create_time > ?", user_id, PayOrGet,lastTime,date).Sum(billRecord, "money")
+	fmt.Printf("all total:%v\n",pay)
+
+	sql := fmt.Sprintf("select %s,sum(money) from bill_record where user_id =%v and type = %v and create_time < '%s' and create_time>'%s' group by(%s)", search_field, user_id, PayOrGet,lastTime,date,search_field)
 	fmt.Println(sql)
+	results, err := pg.SQL(sql).QueryString()
+	if err != nil{
+		fmt.Println(err)
+		return nil,err
+	}
+	fmt.Println(results)
+	var pie PieRes
+	var PieList []PieRes
+	var total float64
+
+	for _, v := range results {
+		pie.Name = v[search_field]
+		sum := v["sum"]
+		sumFloat,_ := strconv.ParseFloat(sum,64)
+		pie.Value = sumFloat
+		Percent := (sumFloat / pay ) * 100
+		pie.Percent, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", Percent), 64)
+		fmt.Printf("percent:%v",pie.Percent)
+		PieList = append(PieList, pie)
+		total += sumFloat
+	}
+	fmt.Println(total)
+	fmt.Println(PieList)
+	res = PieList
+	return res ,nil
+
+
+	//sum, err := pg.Table("bill_record").GroupBy("account_id").Where("user_id =?", user_id).Sum(billRecord, "money")
+	//fmt.Printf("sum:%v",sum)
 
 	//select account_name,sum(money) from  bill_record where user_id = 1 and type = 0 group by(account_name);
 	//
 	//	pg.GroupBy("account_id").Find(&billRecord)
-
-
-	return nil, nil
 }
