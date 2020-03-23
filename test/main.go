@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -803,6 +804,7 @@ func GetLableList(db *xorm.Engine) (res []Label, err error) {
 }
 
 type BillRecord struct {
+	SampleId    int       `json:"sample_fid"`
 	UserId      int       `json:"user_id"`
 	Type        int       `json:"type"`       // 0 支出 1 收入
 	AccountId   int       `json:"account_id"` // 1、微信 2、 支付宝 3、银行卡
