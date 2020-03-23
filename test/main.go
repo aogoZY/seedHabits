@@ -817,7 +817,7 @@ type BillRecord struct {
 
 func InsertBillRecord(db *xorm.Engine, params BillRecord) (err error) {
 	affected, err := db.Insert(&params)
-	if err != nil {ƒ
+	if err != nil {
 		fmt.Println(err)
 		return err
 	}
