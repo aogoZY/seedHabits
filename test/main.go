@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 )
 
@@ -382,23 +381,44 @@ func main() {
 		userIdStr := c.Query("user_id")
 		user_id, _ := strconv.Atoi(userIdStr)
 		date := c.Query("date")
-		accountIdStr := c.Query("account_id")
+		accountIdStr := c.DefaultQuery("account_id","")
 		account_id, _ := strconv.Atoi(accountIdStr)
-		account_name := c.Query("account_name")
+		account_name := c.DefaultQuery("account_name","")
+		fmt.Printf("accpunt_id：%v",account_id)
+		fmt.Printf("accpunt_name：%v",account_name)
+
 		db, _ := connectPgDB()
-		res, err := GetItemListByMonthAndAccountName(db, user_id, date, account_id, account_name)
-		if err != nil {
+		if accountIdStr == "" && account_name == ""{
+			res,err := GetItemListByMonth(db, user_id, date)
+			if err != nil {
+				c.JSON(0, gin.H{
+					"code": 1,
+					"msg":  err,
+				})
+				return
+			}
 			c.JSON(0, gin.H{
-				"code": 1,
-				"msg":  err,
+				"code": 0,
+				"msg":  "successed!",
+				"data": res,
 			})
-			return
+		}else {
+			res, err := GetItemListByMonthAndAccountName(db, user_id, date, account_id, account_name)
+			if err != nil {
+				c.JSON(0, gin.H{
+					"code": 1,
+					"msg":  err,
+				})
+				return
+			}
+			c.JSON(0, gin.H{
+				"code": 0,
+				"msg":  "successed!",
+				"data": res,
+			})
+
 		}
-		c.JSON(0, gin.H{
-			"code": 0,
-			"msg":  "successed!",
-			"data": res,
-		})
+
 	})
 	r.GET("/bill/pie", func(c *gin.Context) {
 		userIdStr := c.Query("user_id")
@@ -424,6 +444,32 @@ func main() {
 			"code": 0,
 			"msg":  "successed",
 			"data": res,
+		})
+	})
+	r.POST("bill/item/update", func(c *gin.Context) {
+		var Params BillRecord
+		err := c.BindJSON(&Params)
+		if err != nil{
+			fmt.Println(err)
+			c.JSON(200,gin.H{
+				"code" : 1,
+				"msg" :err,
+			})
+			return
+		}
+		pg,_ := connectPgDB()
+		err = UpdateBillItem(pg,Params)
+		if err !=nil {
+			fmt.Println(err)
+			c.JSON(200,gin.H{
+				"code" : 1,
+				"msg" :err,
+			})
+			return
+		}
+		c.JSON(200,gin.H{
+			"code" : 0,
+			"msg" : "successed !",
 		})
 	})
 
@@ -804,7 +850,7 @@ func GetLableList(db *xorm.Engine) (res []Label, err error) {
 }
 
 type BillRecord struct {
-	SampleId    int       `json:"sample_fid"`
+	SampleId    int       `json:"sample_id"`
 	UserId      int       `json:"user_id"`
 	Type        int       `json:"type"`       // 0 支出 1 收入
 	AccountId   int       `json:"account_id"` // 1、微信 2、 支付宝 3、银行卡
@@ -909,7 +955,12 @@ func GetItemListByMonthAndAccountName(db *xorm.Engine, user_id int, date string,
 	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
 	fmt.Printf("lastMonth: %v\n", lastOfMonth)
 
-	err = db.Desc("create_time").Where("user_id =? and account_id = ? and account_name = ? and create_time > ? and create_time < ?", user_id, account_id, account_name, date, lastOfMonth).Find(&billRecord)
+	lastofMonthDay := lastOfMonth.Format("2006-01-02")
+	fmt.Printf("lastofMonthDay:%s", lastofMonthDay)
+	lastTime := lastofMonthDay + " 23:59:59"
+	fmt.Printf("lasttime:%s\n", lastTime)
+
+	err = db.Desc("create_time").Where("user_id =? and account_id = ? and account_name = ? and create_time > ? and create_time < ?", user_id, account_id, account_name, date, lastTime).Find(&billRecord)
 	if err != nil {
 		fmt.Println(err)
 		return res, err
@@ -918,9 +969,45 @@ func GetItemListByMonthAndAccountName(db *xorm.Engine, user_id int, date string,
 	fmt.Println("----------分割线------------")
 	res.ItemList = billRecord
 	bill := new(BillRecord)
-	pay, err := db.Where("user_id =? and account_id = ? and account_name =? and create_time > ? and create_time < ?  and type = ?", user_id, account_id, account_name, date, lastOfMonth, Pay).Sum(bill, "money")
+	pay, err := db.Where("user_id =? and account_id = ? and account_name =? and create_time > ? and create_time < ?  and type = ?", user_id, account_id, account_name, date, lastTime, Pay).Sum(bill, "money")
 	fmt.Printf("pay: %v\n", pay)
-	income, err := db.Where("user_id =? and account_id = ? and account_name =? and create_time > ? and create_time < ?  and type = ?", user_id, account_id, account_name, date, lastOfMonth, Income).Sum(bill, "money")
+	income, err := db.Where("user_id =? and account_id = ? and account_name =? and create_time > ? and create_time < ?  and type = ?", user_id, account_id, account_name, date, lastTime, Income).Sum(bill, "money")
+	fmt.Printf("income: %v\n", income)
+	res.Income = income
+	res.Pay = pay
+	res.Rest = income - pay
+	return res, nil
+}
+
+
+func GetItemListByMonth(db *xorm.Engine, user_id int, date string) (res GetItemByAccountNameRes, err error) {
+	billRecord := make([]BillRecord, 0)
+	index := strings.Index(date, "-")
+	year := date[:index]
+	month := date[index+1:]
+	yearInt, _ := strconv.Atoi(year)
+	monthInt, _ := strconv.Atoi(month)
+
+	firstOfMonth := time.Date(yearInt, time.Month(monthInt), 1, 0, 0, 0, 0, time.Local)
+	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
+	fmt.Printf("lastMonth: %v\n", lastOfMonth)
+	lastofMonthDay := lastOfMonth.Format("2006-01-02")
+	fmt.Printf("lastofMonthDay:%s", lastofMonthDay)
+	lastTime := lastofMonthDay + " 23:59:59"
+	fmt.Printf("lasttime:%s\n", lastTime)
+
+	err = db.Desc("create_time").Where("user_id =? and create_time > ? and create_time < ?", user_id, date, lastTime).Find(&billRecord)
+	if err != nil {
+		fmt.Println(err)
+		return res, err
+	}
+	fmt.Printf(" billRecord: %+v", billRecord)
+	fmt.Println("----------分割线------------")
+	res.ItemList = billRecord
+	bill := new(BillRecord)
+	pay, err := db.Where("user_id =? and create_time > ? and create_time < ?  and type = ?", user_id, date, lastTime, Pay).Sum(bill, "money")
+	fmt.Printf("pay: %v\n", pay)
+	income, err := db.Where("user_id =? and create_time > ? and create_time < ?  and type = ?", user_id, date, lastTime, Income).Sum(bill, "money")
 	fmt.Printf("income: %v\n", income)
 	res.Income = income
 	res.Pay = pay
@@ -1001,4 +1088,17 @@ func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int, Pa
 	//select account_name,sum(money) from  bill_record where user_id = 1 and type = 0 group by(account_name);
 	//
 	//	pg.GroupBy("account_id").Find(&billRecord)
+}
+
+func UpdateBillItem(pg *xorm.Engine, Params BillRecord )error{
+	affected,err := pg.Update(&Params, &BillRecord{SampleId:Params.SampleId})
+	if err !=nil{
+		fmt.Println(err)
+		return err
+	}
+	if affected > 0{
+		return nil
+	}
+	return errors.New("update failed")
+
 }
