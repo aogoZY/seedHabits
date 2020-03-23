@@ -222,7 +222,7 @@ func main() {
 		fmt.Println("user_id:", param.Detail.UserId)
 		dbpg, _ := connectPgDB()
 		NTime := time.Now()
-		punchTime := NTime.Format("06-01-02 15:04:05")
+		punchTime := NTime.Format("2006-01-02 15:04:05")
 		param.Detail.CreateTime = punchTime
 		fmt.Printf("%+v", param)
 		fmt.Println(param.PunchFlag)
@@ -810,13 +810,14 @@ type BillRecord struct {
 	Money       float64   `json:"money"`
 	LabelId     int       `json:"label_id"`
 	LabelName   string    `json:"label_name"`
+	LabelImg    string    `json:"label_img"`
 	Comment     string    `json:"comment"`
 	CreatTime   time.Time `xorm:"create_time created" json:"create_time" description:"创建时间"`
 }
 
 func InsertBillRecord(db *xorm.Engine, params BillRecord) (err error) {
 	affected, err := db.Insert(&params)
-	if err != nil {
+	if err != nil {ƒ
 		fmt.Println(err)
 		return err
 	}
@@ -943,7 +944,7 @@ type PieRes struct {
 	Percent float64 `json:"percent"`
 }
 
-func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int,PayOrGet int) (res []PieRes, err error) {
+func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int, PayOrGet int) (res []PieRes, err error) {
 	index := strings.Index(date, "-")
 	year := date[:index]
 	month := date[index+1:]
@@ -952,25 +953,24 @@ func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int,Pay
 
 	firstOfMonth := time.Date(yearInt, time.Month(monthInt), 1, 0, 0, 0, 0, time.Local)
 	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
-	fmt.Printf("lastMonth:%s",lastOfMonth)
+	fmt.Printf("lastMonth:%s", lastOfMonth)
 	lastofMonthDay := lastOfMonth.Format("2006-01-02")
-	fmt.Printf("lastofMonthDay:%s",lastofMonthDay)
+	fmt.Printf("lastofMonthDay:%s", lastofMonthDay)
 	lastTime := lastofMonthDay + " 23:59:59"
-	fmt.Printf("lasttime:%s\n",lastTime)
-
+	fmt.Printf("lasttime:%s\n", lastTime)
 
 	search_field := GetRearchWayById(search_type)
 	fmt.Println(search_field)
 	billRecord := new(BillRecord)
-	pay, err := pg.Where("user_id =? and type = ? and create_time < ? and create_time > ?", user_id, PayOrGet,lastTime,date).Sum(billRecord, "money")
-	fmt.Printf("all total:%v\n",pay)
+	pay, err := pg.Where("user_id =? and type = ? and create_time < ? and create_time > ?", user_id, PayOrGet, lastTime, date).Sum(billRecord, "money")
+	fmt.Printf("all total:%v\n", pay)
 
-	sql := fmt.Sprintf("select %s,sum(money) from bill_record where user_id =%v and type = %v and create_time < '%s' and create_time>'%s' group by(%s)", search_field, user_id, PayOrGet,lastTime,date,search_field)
+	sql := fmt.Sprintf("select %s,sum(money) from bill_record where user_id =%v and type = %v and create_time < '%s' and create_time>'%s' group by(%s)", search_field, user_id, PayOrGet, lastTime, date, search_field)
 	fmt.Println(sql)
 	results, err := pg.SQL(sql).QueryString()
-	if err != nil{
+	if err != nil {
 		fmt.Println(err)
-		return nil,err
+		return nil, err
 	}
 	fmt.Println(results)
 	var pie PieRes
@@ -980,19 +980,18 @@ func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int,Pay
 	for _, v := range results {
 		pie.Name = v[search_field]
 		sum := v["sum"]
-		sumFloat,_ := strconv.ParseFloat(sum,64)
+		sumFloat, _ := strconv.ParseFloat(sum, 64)
 		pie.Value = sumFloat
-		Percent := (sumFloat / pay ) * 100
+		Percent := (sumFloat / pay) * 100
 		pie.Percent, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", Percent), 64)
-		fmt.Printf("percent:%v",pie.Percent)
+		fmt.Printf("percent:%v", pie.Percent)
 		PieList = append(PieList, pie)
 		total += sumFloat
 	}
 	fmt.Println(total)
 	fmt.Println(PieList)
 	res = PieList
-	return res ,nil
-
+	return res, nil
 
 	//sum, err := pg.Table("bill_record").GroupBy("account_id").Where("user_id =?", user_id).Sum(billRecord, "money")
 	//fmt.Printf("sum:%v",sum)
