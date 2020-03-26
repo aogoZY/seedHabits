@@ -429,7 +429,8 @@ func main() {
 		}
 		c.JSON(200, gin.H{
 			"code": 0,
-			"msg":  res,
+			"msg":  "successed!",
+			"data": res,
 		})
 
 	})
@@ -1053,14 +1054,16 @@ func GetTotalAndItemListByMonth(db *xorm.Engine, user_id int, date string, accou
 	pay, err := sessionPay.Sum(bill, "money")
 	fmt.Printf("pay: %v\n", pay)
 
-	sessionIncome := db.Where("user_id =? and create_time > ? and create_time < ?  and type = ?", user_id, date, lastTime, Pay)
+	sessionIncome := db.Where("user_id =? and create_time > ? and create_time < ?  and type = ?", user_id, date, lastTime, Income)
 	if account_id != 0 && account_name != "" {
-		sessionIncome = sessionIncome.In("account_id", account_id)
+		sessionIncome = sessionIncome.Where("account_id=?", account_id)
 	}
 	income, err := sessionIncome.Sum(bill, "money")
+	fmt.Printf("income:%v\n", income)
 	res.Income = income
 	res.Pay = pay
 	res.Rest = income - pay
+	fmt.Printf("rest:%v",res.Rest)
 	return res, nil
 }
 
@@ -1177,7 +1180,7 @@ func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int, Pa
 func UpdateBillItem(pg *xorm.Engine, Params BillRecord) error {
 	fmt.Println("sapmleId", Params.SampleId)
 	sample_id := Params.SampleId
-	affected, err := pg.Cols("type","label_id","label_name","label_img","money","account_id","account_name","comment").In("sample_id", sample_id).Update(&Params)
+	affected, err := pg.Cols("type", "label_id", "label_name", "label_img", "money", "account_id", "account_name", "comment").In("sample_id", sample_id).Update(&Params)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -1189,7 +1192,7 @@ func UpdateBillItem(pg *xorm.Engine, Params BillRecord) error {
 
 }
 
-func DeleteBillItem(pg *xorm.Engine , user_id int,item_id int)(err error) {
+func DeleteBillItem(pg *xorm.Engine, user_id int, item_id int) (err error) {
 	billRecord := &BillRecord{SampleId: item_id, UserId: user_id}
 	affected, err := pg.Delete(billRecord)
 	if err != nil {
