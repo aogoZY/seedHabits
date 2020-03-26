@@ -768,7 +768,7 @@ func UpdateDailyDetail(db *xorm.Engine, params Detail) error {
 	//res, err := engine.Exec(sql, 1, "xorm")
 	//
 	time := time.Now()
-	today := time.Format("06-01-02")
+	today := time.Format("2006-01-02")
 	fmt.Printf("day:%v\n", today)
 	sql := "update detail set create_time = ?, word = ?,img = ? where user_id = ? and habit_id = ? and habit_name = ? and create_time > ?"
 	_, err := db.Exec(sql, params.CreateTime, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName, today)
