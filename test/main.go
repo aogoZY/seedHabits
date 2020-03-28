@@ -221,10 +221,7 @@ func main() {
 		fmt.Println("habit_id :", param.Detail.HabitId)
 		fmt.Println("user_id:", param.Detail.UserId)
 		dbpg, _ := connectPgDB()
-		NTime := time.Now()
-		punchTime := NTime.Format("2006-01-02 15:04:05")
-		param.Detail.CreateTime = punchTime
-		fmt.Printf("%+v", param)
+		fmt.Printf("%+v\n", param)
 		fmt.Println(param.PunchFlag)
 
 		if param.PunchFlag {
@@ -717,13 +714,14 @@ func getHabitListByUserId(db *xorm.Engine, userId int) (res []UserHabits, err er
 
 type Detail struct {
 	SampleId   int    `json:"sample_id"`
-	CreateTime string `json:"create_time"`
+	CreateTime time.Time `xorm:"create_time created" json:"created_time" description:"创建时间"`
 	Word       string `json:"word"`
 	Img        string `json:"img"`
 	UserId     int    `json:"user_id"`
 	HabitId    int    `json:"habit_id"`
 	UserName   string `json:"user_name"`
 	HabitName  string `json:"habit_name"`
+
 }
 
 type PunchRequest struct {
@@ -749,17 +747,26 @@ func InserDailyDetail(db *xorm.Engine, params Detail) error {
 	// detail.HabitName =params.HabitName
 
 	// detail.CreateTime=punchTime
+	//
+	//sql := "insert into detail(create_time,word,img,user_id,habit_id,habit_name) values (?, ?, ?, ?, ?, ?)"
+	//res, err := db.Exec(sql, params.CreateTime, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName)
 
-	sql := "insert into detail(create_time,word,img,user_id,habit_id,habit_name) values (?, ?, ?, ?, ?, ?)"
-	res, err := db.Exec(sql, params.CreateTime, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName)
+
+	//sql := "insert into detail(word,img,user_id,habit_id,habit_name) values (?, ?, ?, ?, ?)"
+	//res, err := db.Exec(sql, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName)
+
+	affected, err := db.Omit("sample_id").Insert(params)
 
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
+	if affected > 0{
+		fmt.Println("affected:",affected)
+		return nil
+	}
+	return errors.New("insert failed!")
 
-	fmt.Println(res)
-	return nil
 }
 
 //修改打卡记录
@@ -770,8 +777,25 @@ func UpdateDailyDetail(db *xorm.Engine, params Detail) error {
 	time := time.Now()
 	today := time.Format("2006-01-02")
 	fmt.Printf("day:%v\n", today)
-	sql := "update detail set create_time = ?, word = ?,img = ? where user_id = ? and habit_id = ? and habit_name = ? and create_time > ?"
-	_, err := db.Exec(sql, params.CreateTime, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName, today)
+	//sql := "update detail set create_time = ?, word = ?,img = ? where user_id = ? and habit_id = ? and habit_name = ? and create_time > ?"
+	//_, err := db.Exec(sql, params.CreateTime, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName, today)
+
+	//sql := "update detail set word = ?,img = ? where user_id = ? and habit_id = ? and habit_name = ? and create_time > ?"
+	//has, err := db.Exec(sql, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName, today)
+	//fmt.Printf("has:%v", has)
+
+	detail :=&Detail{Word:params.Word,Img:params.Img,UserId:params.UserId,HabitId:params.HabitId,HabitName:params.HabitName}
+	affected,err := db.Where("create_time > ?",today).Update(detail)
+	if err!=nil{
+		fmt.Println(err)
+		return err
+	}
+	if affected > 1{
+		fmt.Printf("affected:%v",affected)
+		return nil
+	}
+	return errors.New("update failed!")
+
 
 	//sql_2 := "update user set age = ? where name = ?"
 	//affected, err := engine.Sql(sql_2, 1, "xorm").Execute()
@@ -855,7 +879,7 @@ func InsertNewHabit(db *xorm.Engine, habitName string, img string) (res int, err
 
 func InsertInfo(db *xorm.Engine, params AddHabitParams, id int) error {
 	tNow := time.Now()
-	timeNow := tNow.Format("06-01-02 15:04:05")
+	timeNow := tNow.Format("2006-01-02 15:04:05")
 
 	info := Info{UserId: params.UserId, HabitId: id, CreateTime: timeNow, HabitName: params.HabitName, HabitImg: params.Img}
 	affected, err := db.Insert(&info)
@@ -1015,8 +1039,7 @@ func GetItemListByMonthAndAccountName(db *xorm.Engine, user_id int, date string,
 	return res, nil
 }
 
-func GetTotalAndItemListByMonth(db *xorm.Engine, user_id int, date string, account_id int, account_name string) (res GetItemByAccountNameRes, err error) {
-	billRecord := make([]BillRecord, 0)
+func GetStartDayAndEndDayByMonth(date string) (StartDate string, EndDate string, err error) {
 	index := strings.Index(date, "-")
 	year := date[:index]
 	month := date[index+1:]
@@ -1025,14 +1048,21 @@ func GetTotalAndItemListByMonth(db *xorm.Engine, user_id int, date string, accou
 
 	firstOfMonth := time.Date(yearInt, time.Month(monthInt), 1, 0, 0, 0, 0, time.Local)
 	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
-	fmt.Printf("lastMonth: %v\n", lastOfMonth)
 
 	lastofMonthDay := lastOfMonth.Format("2006-01-02")
 	fmt.Printf("lastofMonthDay:%s", lastofMonthDay)
-	lastTime := lastofMonthDay + " 23:59:59"
-	fmt.Printf("lasttime:%s\n", lastTime)
+	EndDate = lastofMonthDay + " 23:59:59"
+	StartDate = date + " 00:00:00"
+	fmt.Printf("StartDate:%s\n", StartDate)
+	fmt.Printf("EndDate:%s\n", EndDate)
+	return StartDate, EndDate, nil
 
-	session := db.Desc("create_time").Where("user_id =? and create_time > ? and create_time < ?", user_id, date, lastTime)
+}
+
+func GetTotalAndItemListByMonth(db *xorm.Engine, user_id int, date string, account_id int, account_name string) (res GetItemByAccountNameRes, err error) {
+	billRecord := make([]BillRecord, 0)
+	startDate, endDate, _ := GetStartDayAndEndDayByMonth(date)
+	session := db.Desc("create_time").Where("user_id =? and create_time > ? and create_time < ?", user_id, startDate, endDate)
 	if account_id != 0 && account_name != "" {
 		session = session.Where("account_id = ? and account_name = ?", account_id, account_name)
 	}
@@ -1047,14 +1077,14 @@ func GetTotalAndItemListByMonth(db *xorm.Engine, user_id int, date string, accou
 	res.ItemList = billRecord
 	bill := new(BillRecord)
 
-	sessionPay := db.Where("user_id =? and create_time > ? and create_time < ?  and type = ?", user_id, date, lastTime, Pay)
+	sessionPay := db.Where("user_id =? and create_time > ? and create_time < ?  and type = ?", user_id, startDate, endDate, Pay)
 	if account_id != 0 && account_name != "" {
 		sessionPay = sessionPay.Where("account_id = ? ", account_id)
 	}
 	pay, err := sessionPay.Sum(bill, "money")
 	fmt.Printf("pay: %v\n", pay)
 
-	sessionIncome := db.Where("user_id =? and create_time > ? and create_time < ?  and type = ?", user_id, date, lastTime, Income)
+	sessionIncome := db.Where("user_id =? and create_time > ? and create_time < ?  and type = ?", user_id, startDate, endDate, Income)
 	if account_id != 0 && account_name != "" {
 		sessionIncome = sessionIncome.Where("account_id=?", account_id)
 	}
@@ -1063,7 +1093,7 @@ func GetTotalAndItemListByMonth(db *xorm.Engine, user_id int, date string, accou
 	res.Income = income
 	res.Pay = pay
 	res.Rest = income - pay
-	fmt.Printf("rest:%v",res.Rest)
+	fmt.Printf("rest:%v", res.Rest)
 	return res, nil
 }
 
@@ -1121,27 +1151,15 @@ type PieRes struct {
 }
 
 func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int, PayOrGet int) (res []PieRes, err error) {
-	index := strings.Index(date, "-")
-	year := date[:index]
-	month := date[index+1:]
-	yearInt, _ := strconv.Atoi(year)
-	monthInt, _ := strconv.Atoi(month)
-
-	firstOfMonth := time.Date(yearInt, time.Month(monthInt), 1, 0, 0, 0, 0, time.Local)
-	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
-	fmt.Printf("lastMonth:%s", lastOfMonth)
-	lastofMonthDay := lastOfMonth.Format("2006-01-02")
-	fmt.Printf("lastofMonthDay:%s", lastofMonthDay)
-	lastTime := lastofMonthDay + " 23:59:59"
-	fmt.Printf("lasttime:%s\n", lastTime)
+	startDate, endDate, _ := GetStartDayAndEndDayByMonth(date)
 
 	search_field := GetRearchWayById(search_type)
 	fmt.Println(search_field)
 	billRecord := new(BillRecord)
-	pay, err := pg.Where("user_id =? and type = ? and create_time < ? and create_time > ?", user_id, PayOrGet, lastTime, date).Sum(billRecord, "money")
+	pay, err := pg.Where("user_id =? and type = ? and create_time < ? and create_time > ?", user_id, PayOrGet, endDate, startDate).Sum(billRecord, "money")
 	fmt.Printf("all total:%v\n", pay)
 
-	sql := fmt.Sprintf("select %s,sum(money) from bill_record where user_id =%v and type = %v and create_time < '%s' and create_time>'%s' group by(%s)", search_field, user_id, PayOrGet, lastTime, date, search_field)
+	sql := fmt.Sprintf("select %s,sum(money) from bill_record where user_id =%v and type = %v and create_time < '%s' and create_time>'%s' group by(%s)", search_field, user_id, PayOrGet, endDate, startDate, search_field)
 	fmt.Println(sql)
 	results, err := pg.SQL(sql).QueryString()
 	if err != nil {
