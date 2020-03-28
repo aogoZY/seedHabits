@@ -486,7 +486,7 @@ func main() {
 	})
 	r.GET("bill/item/delete", func(c *gin.Context) {
 		UserIdStr := c.Query("user_id")
-		ItemIdStr := c.Query("item_id")
+		ItemIdStr := c.Query("sample_id")
 		user_id, _ := strconv.Atoi(UserIdStr)
 		item_id, _ := strconv.Atoi(ItemIdStr)
 		pg, _ := connectPgDB()
@@ -1204,8 +1204,8 @@ func UpdateBillItem(pg *xorm.Engine, Params BillRecord) error {
 
 }
 
-func DeleteBillItem(pg *xorm.Engine, user_id int, item_id int) (err error) {
-	billRecord := &BillRecord{SampleId: item_id, UserId: user_id}
+func DeleteBillItem(pg *xorm.Engine, user_id int, sample_id int) (err error) {
+	billRecord := &BillRecord{SampleId: sample_id, UserId: user_id}
 	affected, err := pg.Delete(billRecord)
 	if err != nil {
 		fmt.Println(err)
