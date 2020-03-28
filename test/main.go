@@ -786,11 +786,12 @@ func UpdateDailyDetail(db *xorm.Engine, params Detail) error {
 
 	detail :=&Detail{Word:params.Word,Img:params.Img,UserId:params.UserId,HabitId:params.HabitId,HabitName:params.HabitName}
 	affected,err := db.Where("create_time > ? and user_id = ? and habit_id = ? ",today,params.UserId,params.HabitId).Update(detail)
+	fmt.Printf("affected:%v",affected)
 	if err!=nil{
 		fmt.Println(err)
 		return err
 	}
-	if affected > 1{
+	if affected == 1{
 		fmt.Printf("affected:%v",affected)
 		return nil
 	}
@@ -799,13 +800,6 @@ func UpdateDailyDetail(db *xorm.Engine, params Detail) error {
 
 	//sql_2 := "update user set age = ? where name = ?"
 	//affected, err := engine.Sql(sql_2, 1, "xorm").Execute()
-
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	return nil
 }
 
 type HabitHistoryInfo struct {
