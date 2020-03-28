@@ -785,7 +785,7 @@ func UpdateDailyDetail(db *xorm.Engine, params Detail) error {
 	//fmt.Printf("has:%v", has)
 
 	detail :=&Detail{Word:params.Word,Img:params.Img,UserId:params.UserId,HabitId:params.HabitId,HabitName:params.HabitName}
-	affected,err := db.Where("create_time > ?",today).Update(detail)
+	affected,err := db.Where("create_time > ? and user_id = ? and habit_id = ? ",today,params.UserId,params.HabitId).Update(detail)
 	if err!=nil{
 		fmt.Println(err)
 		return err
