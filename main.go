@@ -1,16 +1,8 @@
 package main
 
-import (
-	"github.com/gin-gonic/gin"
-
-)
+import "seedHabits/router"
 
 func main() {
-
-	r := gin.New()
-
-	r.GET("/", func(c *gin.Context) {
-		c.String(200, "Hello, aogo,123")
-	})
-	r.Run(":9090")
+	r := router.InitRouter2()
+	r.Run()
 }

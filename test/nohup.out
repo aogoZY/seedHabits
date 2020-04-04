@@ -1,0 +1,47 @@
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /                         --> main.main.func1 (2 handlers)
+[GIN-debug] GET    /user/:name               --> main.main.func2 (2 handlers)
+[GIN-debug] POST   /user/register            --> main.main.func3 (2 handlers)
+[GIN-debug] POST   /user/login               --> main.main.func4 (2 handlers)
+[GIN-debug] GET    /habit/list/:userId       --> main.main.func5 (2 handlers)
+[GIN-debug] POST   /punch                    --> main.main.func6 (2 handlers)
+[GIN-debug] GET    /habit/history            --> main.main.func7 (2 handlers)
+[GIN-debug] POST   /habit/add                --> main.main.func8 (2 handlers)
+[GIN-debug] Environment variable PORT is undefined. Using port :8080 by default
+[GIN-debug] Listening and serving HTTP on :8080
+signal: interrupt
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /                         --> main.main.func1 (2 handlers)
+[GIN-debug] GET    /user/:name               --> main.main.func2 (2 handlers)
+[GIN-debug] POST   /user/register            --> main.main.func3 (2 handlers)
+[GIN-debug] POST   /user/login               --> main.main.func4 (2 handlers)
+[GIN-debug] GET    /habit/list/:userId       --> main.main.func5 (2 handlers)
+[GIN-debug] POST   /punch                    --> main.main.func6 (2 handlers)
+[GIN-debug] GET    /habit/history            --> main.main.func7 (2 handlers)
+[GIN-debug] POST   /habit/add                --> main.main.func8 (2 handlers)
+[GIN-debug] Environment variable PORT is undefined. Using port :8080 by default
+[GIN-debug] Listening and serving HTTP on :8080
+GET
+userID: 2
+[xorm] [info]  2020/03/16 22:28:13.727364 PING DATABASE postgres
+pong
+[xorm] [info]  2020/03/16 22:28:13.752154 [SQL] SELECT "user_id", "habit_id", "create_time", "habit_name", "habit_img" FROM "info" WHERE (user_id=$1) []interface {}{2}
+GET
+userID: 1
+[xorm] [info]  2020/03/16 22:28:41.394254 PING DATABASE postgres
+pong
+[xorm] [info]  2020/03/16 22:28:41.403526 [SQL] SELECT "user_id", "habit_id", "create_time", "habit_name", "habit_img" FROM "info" WHERE (user_id=$1) []interface {}{1}
+POST
+[xorm] [info]  2020/03/16 22:32:05.710839 PING DATABASE postgres
+pong
+[xorm] [info]  2020/03/16 22:32:05.719957 [SQL] insert into habit (habit_img,habit_name) values ($1,$2) []interface {}{"", "记账"}
+[xorm] [info]  2020/03/16 22:32:05.724162 [SQL] SELECT "habit_id" FROM "habit" WHERE (habit_name=$1 and habit_img = $2) LIMIT 1 []interface {}{"记账", ""}
+habit_id 18
+[xorm] [info]  2020/03/16 22:32:05.726406 [SQL] INSERT INTO "info" ("user_id","habit_id","create_time","habit_name","habit_img") VALUES ($1, $2, $3, $4, $5) []interface {}{4, 18, "2020-03-16 22:32:05", "记账", ""}
+signal: terminated

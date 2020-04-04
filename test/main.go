@@ -1207,6 +1207,7 @@ func UpdateBillItem(pg *xorm.Engine, Params BillRecord) error {
 func DeleteBillItem(pg *xorm.Engine, user_id int, sample_id int) (err error) {
 	billRecord := &BillRecord{SampleId: sample_id, UserId: user_id}
 	affected, err := pg.Delete(billRecord)
+	fmt.Printf("affected:%v",affected)
 	if err != nil {
 		fmt.Println(err)
 		return err
