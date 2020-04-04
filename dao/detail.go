@@ -14,7 +14,7 @@ type Detail struct {
 }
 
 type PunchRequest struct {
-	PunchFlag bool `json:"punchFlag"` // flag为true，代表以打卡，新建记录 / false 修改记录
+	PunchFlag bool `json:"punch_flag"` // flag为true，代表以打卡，新建记录 / false 修改记录
 	Detail
 }
 

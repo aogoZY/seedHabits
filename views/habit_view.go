@@ -45,6 +45,7 @@ func PunchHabitHandler(c *gin.Context) {
 	fmt.Printf("%+v\n", param)
 	fmt.Println(param.PunchFlag)
 
+
 	if param.PunchFlag {
 		err := services.UpdateDailyDetail(dbpg, param.Detail)
 		if err != nil {
