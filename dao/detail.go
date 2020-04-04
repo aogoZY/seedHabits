@@ -1,14 +1,16 @@
 package dao
 
+import "time"
+
 type Detail struct {
-	SampleId   int    `json:"sample_id"`
-	CreateTime string `json:"create_time"`
-	Word       string `json:"word"`
-	Img        string `json:"img"`
-	UserId     int    `json:"user_id"`
-	HabitId    int    `json:"habit_id"`
-	UserName   string `json:"user_name"`
-	HabitName  string `json:"habit_name"`
+	SampleId   int       `json:"sample_id"`
+	CreateTime time.Time `xorm:"create_time created" json:"created_time" description:"创建时间"`
+	Word       string    `json:"word"`
+	Img        string    `json:"img"`
+	UserId     int       `json:"user_id"`
+	HabitId    int       `json:"habit_id"`
+	UserName   string    `json:"user_name"`
+	HabitName  string    `json:"habit_name"`
 }
 
 type PunchRequest struct {
