@@ -29,7 +29,7 @@ func GetHabitListHandler(c *gin.Context) {
 }
 
 func PunchHabitHandler(c *gin.Context) {
-	var param dao.PunchRequest
+	var param dao.Detail
 	err := c.ShouldBindJSON(&param)
 	if err != nil {
 		fmt.Println(err)
@@ -39,26 +39,11 @@ func PunchHabitHandler(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("habit_id :", param.Detail.HabitId)
-	fmt.Println("user_id:", param.Detail.UserId)
+	fmt.Println("habit_id :", param.HabitId)
+	fmt.Println("user_id:", param.UserId)
 	dbpg, _ := dao.ConnectPgDB()
 	fmt.Printf("%+v\n", param)
-	fmt.Println(param.PunchFlag)
-
-
-	if param.PunchFlag {
-		err := services.UpdateDailyDetail(dbpg, param.Detail)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		c.JSON(200, gin.H{
-			"msg":  "update punch info successed!",
-			"code": 0,
-		})
-		return
-	}
-	err = services.InserDailyDetail(dbpg, param.Detail)
+	err = services.InserDailyDetail(dbpg, param)
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(200, gin.H{
@@ -69,6 +54,34 @@ func PunchHabitHandler(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{
 		"msg":  "insert punch info successed! Keep moving on!",
+		"code": 0,
+	})
+}
+
+func UpdatePunchRecordHandler(c *gin.Context) {
+	var param dao.Detail
+	err := c.BindJSON(&param)
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(200, gin.H{
+			"code": 1,
+			"msg":  err,
+		})
+		return
+	}
+	fmt.Println(param)
+	dbpg, _ := dao.ConnectPgDB()
+	err = services.UpdateDailyDetail(dbpg, param)
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(200, gin.H{
+			"msg":err,
+			"code":1,
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"msg":  "update punch info successed!",
 		"code": 0,
 	})
 }

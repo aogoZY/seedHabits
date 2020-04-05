@@ -28,7 +28,7 @@ func GetHabitListByUserId(db *xorm.Engine, userId int) (res []dao.UserHabits, er
 func GetHistoryByUserIdAndHabitId(db *xorm.Engine, user_id int, habit_id int) (res []dao.HabitHistoryRes, err error) {
 	var habitHistoryInfo []dao.HabitHistoryInfo
 	var habitHistoryItem dao.HabitHistoryRes
-	err = db.Table("detail").Desc("create_time").Where("user_id = ? ", user_id).And("habit_id = ?", habit_id).Find(&habitHistoryInfo)
+	err = db.Table("detail").Desc("update_time").Where("user_id = ? ", user_id).And("habit_id = ?", habit_id).Find(&habitHistoryInfo)
 	if err != nil {
 		fmt.Println(err)
 		return res, err
@@ -87,12 +87,10 @@ func InsertInfo(db *xorm.Engine, params dao.AddHabitParams, id int) error {
 }
 
 func UpdateDailyDetail(db *xorm.Engine, params dao.Detail) error {
-	//sql ="update user set age = ? where name = ?"
-	//res, err := engine.Exec(sql, 1, "xorm")
-	//
-	time := time.Now()
-	today := time.Format("2006-01-02")
-	fmt.Printf("day:%v\n", today)
+	//nTime := time.Now()
+	//updateTime := nTime.Format("2006-01-02 15:04:05")
+	//fmt.Printf("day:%v\n", updateTime)
+	//fmt.Println(params)
 	//sql := "update detail set create_time = ?, word = ?,img = ? where user_id = ? and habit_id = ? and habit_name = ? and create_time > ?"
 	//_, err := db.Exec(sql, params.CreateTime, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName, today)
 
@@ -100,8 +98,7 @@ func UpdateDailyDetail(db *xorm.Engine, params dao.Detail) error {
 	//has, err := db.Exec(sql, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName, today)
 	//fmt.Printf("has:%v", has)
 
-	detail :=&dao.Detail{Word:params.Word,Img:params.Img,UserId:params.UserId,HabitId:params.HabitId,HabitName:params.HabitName}
-	affected,err := db.Where("create_time > ? and user_id = ? and habit_id = ? ",today,params.UserId,params.HabitId).Update(detail)
+	affected,err := db.Cols("word","img").Where("sample_id= ?",params.SampleId).Update(&params)
 	fmt.Printf("affected:%v",affected)
 	if err!=nil{
 		fmt.Println(err)
@@ -112,32 +109,11 @@ func UpdateDailyDetail(db *xorm.Engine, params dao.Detail) error {
 		return nil
 	}
 	return errors.New("update failed!")
-
-
-	//sql_2 := "update user set age = ? where name = ?"
-	//affected, err := engine.Sql(sql_2, 1, "xorm").Execute()
 }
 
 // 新建打卡记录
 func InserDailyDetail(db *xorm.Engine, params dao.Detail) error {
-	// detail := new(Detail)
-	// detail.Word = params.Word
-	// detail.Img = params.Img
-	// detail.UserId=params.UserId
-	// detail.HabitId=params.HabitId
-	// detail.HabitName =params.HabitName
-
-	// detail.CreateTime=punchTime
-	//
-	//sql := "insert into detail(create_time,word,img,user_id,habit_id,habit_name) values (?, ?, ?, ?, ?, ?)"
-	//res, err := db.Exec(sql, params.CreateTime, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName)
-
-
-	//sql := "insert into detail(word,img,user_id,habit_id,habit_name) values (?, ?, ?, ?, ?)"
-	//res, err := db.Exec(sql, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName)
-
 	affected, err := db.Omit("sample_id").Insert(params)
-
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -147,5 +123,4 @@ func InserDailyDetail(db *xorm.Engine, params dao.Detail) error {
 		return nil
 	}
 	return errors.New("insert failed!")
-
 }

@@ -22,6 +22,8 @@ func InitRouter() *gin.Engine {
 
 	router.POST("/punch", views.PunchHabitHandler) //打卡
 
+	router.POST("/punch/update", views.UpdatePunchRecordHandler)  //更新当日打卡内容
+
 	router.GET("habit/history", views.GetHabitHistoryHandler) //获取某习惯的打卡历史记录
 
 	router.POST("/habit/add", views.AddHabitHandler) //新建习惯
