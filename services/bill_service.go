@@ -170,7 +170,7 @@ func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int, Pa
 func UpdateBillItem(pg *xorm.Engine, Params dao.BillRecord) error {
 	fmt.Println("sapmleId", Params.SampleId)
 	sample_id := Params.SampleId
-	affected, err := pg.Cols("type", "label_id", "label_name", "label_img", "money", "account_id", "account_name", "comment").In("sample_id", sample_id).Update(&Params)
+	affected, err := pg.Cols("type", "label_id", "label_name", "label_img", "money", "account_id", "account_name", "comment","create_time").In("sample_id", sample_id).Update(&Params)
 	if err != nil {
 		fmt.Println(err)
 		return err

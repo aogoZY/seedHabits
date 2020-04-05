@@ -1,19 +1,17 @@
 package dao
 
-import "time"
-
 type BillRecord struct {
-	SampleId    int       `json:"sample_id"`
-	UserId      int       `json:"user_id"`
-	Type        int       `json:"type"`       // 0 支出 1 收入
-	AccountId   int       `json:"account_id"` // 1、微信 2、 支付宝 3、银行卡
-	AccountName string    `json:"account_name"`
-	Money       float64   `json:"money"`
-	LabelId     int       `json:"label_id"`
-	LabelName   string    `json:"label_name"`
-	LabelImg    string    `json:"label_img"`
-	Comment     string    `json:"comment"`
-	CreatTime   time.Time `xorm:"create_time created" json:"create_time" description:"创建时间"`
+	SampleId    int     `json:"sample_id"`
+	UserId      int     `json:"user_id"`
+	Type        int     `json:"type"`       // 0 支出 1 收入
+	AccountId   int     `json:"account_id"` // 1、微信 2、 支付宝 3、银行卡
+	AccountName string  `json:"account_name"`
+	Money       float64 `json:"money"`
+	LabelId     int     `json:"label_id"`
+	LabelName   string  `json:"label_name"`
+	LabelImg    string  `json:"label_img"`
+	Comment     string  `json:"comment"`
+	CreateTime   string  `json:"create_time"`
 }
 
 type AccountRestResult struct {
@@ -45,5 +43,3 @@ type PieRes struct {
 	Value   float64 `json:"value"`
 	Percent float64 `json:"percent"`
 }
-
-

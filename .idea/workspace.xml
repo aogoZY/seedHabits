@@ -3,8 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="9b53fe1a-9ab7-4997-9029-10d08a4afd3b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dao/detail.go" beforeDir="false" afterPath="$PROJECT_DIR$/dao/detail.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/habit_view.go" beforeDir="false" afterPath="$PROJECT_DIR$/views/habit_view.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dao/bill.go" beforeDir="false" afterPath="$PROJECT_DIR$/dao/bill.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/router/Arouter.go" beforeDir="false" afterPath="$PROJECT_DIR$/router/router.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/bill_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/bill_service.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
