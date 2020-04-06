@@ -18,7 +18,7 @@ type HabitHistoryInfo struct {
 	CreateTime string `json:"create_time"`
 	Word       string `json:"word"`
 	Img        string `json:"img"`
-	SampleId   string `json:"sample_id"`
+	SampleId   int    `json:"sample_id"`
 	UpdateTime string `json:"update_time"`
 }
 

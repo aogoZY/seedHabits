@@ -1,10 +1,17 @@
 package services
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/go-xorm/xorm"
+	"io/ioutil"
+	"log"
+	"math/rand"
+	"os"
+	"regexp"
 	"seedHabits/dao"
+	"strconv"
 	"time"
 )
 
@@ -97,6 +104,36 @@ func UpdateDailyDetail(db *xorm.Engine, params dao.Detail) error {
 	//sql := "update detail set word = ?,img = ? where user_id = ? and habit_id = ? and habit_name = ? and create_time > ?"
 	//has, err := db.Exec(sql, params.Word, params.Img, params.UserId, params.HabitId, params.HabitName, today)
 	//fmt.Printf("has:%v", has)
+	//var base64_image_content string = params.Img
+	////data:image/jpeg;base64,
+	//b, _ := regexp.MatchString(`^data:\s*image\/(\w+);base64,`, base64_image_content)
+	//if !b {
+	//	return errors.New("image file type wrong")
+	//}
+	//
+	//re, _ := regexp.Compile(`^data:\s*image\/(\w+);base64,`)
+	//fmt.Println("re",re)
+	//allData := re.FindAllSubmatch([]byte(base64_image_content), 2)
+	//fmt.Println("data",allData)
+	//fileType := string(allData[0][1]) //png ，jpeg 后缀获取
+	//fmt.Println("fileType",fileType)
+	//
+	//base64Str := re.ReplaceAllString(base64_image_content, "")
+	//fmt.Println("base64Str",base64Str)
+	//
+	//ddd, _ := base64.StdEncoding.DecodeString(base64Str) //成图片文件并把文件写入到buffer
+	//fmt.Println("ddd",ddd)
+	//err2 := ioutil.WriteFile("./output." + fileType, ddd, 0666)   //buffer输出到jpg文件中（不做处理，直接写到文件）
+	//if err2 != nil{
+	//	fmt.Println(err2)
+	//	return err2
+	//}
+	path, err := WriteFile(params.Img)
+	if err !=nil{
+		return err
+	}
+	fmt.Println(path)
+	params.Img = path
 
 	affected,err := db.Cols("word","img").Where("sample_id= ?",params.SampleId).Update(&params)
 	fmt.Printf("affected:%v",affected)
@@ -111,8 +148,51 @@ func UpdateDailyDetail(db *xorm.Engine, params dao.Detail) error {
 	return errors.New("update failed!")
 }
 
+func WriteFile(base64_image_content string) (path string,err error) {
+
+	b, err := regexp.MatchString(`^data:\s*image\/(\w+);base64,`, base64_image_content)
+	if !b {
+		return "",err
+	}
+
+	re, _ := regexp.Compile(`^data:\s*image\/(\w+);base64,`)
+	allData := re.FindAllSubmatch([]byte(base64_image_content), 2)
+	fileType := string(allData[0][1]) //png ，jpeg 后缀获取
+
+	base64Str := re.ReplaceAllString(base64_image_content, "")
+
+
+	curFileStr := strconv.FormatInt(time.Now().UnixNano(), 10)
+
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	n := r.Intn(99999)
+
+	dir, err := os.Getwd()
+	fmt.Println(dir)
+
+
+	var file string = dir + "/images/" + curFileStr + strconv.Itoa(n) + "." + fileType
+	fmt.Println("file",file)
+	byte, _ := base64.StdEncoding.DecodeString(base64Str)
+
+	err = ioutil.WriteFile(file, byte, 0666)
+	if err != nil {
+		log.Println(err)
+		return "",err
+	}
+	return file,nil
+}
+
 // 新建打卡记录
 func InserDailyDetail(db *xorm.Engine, params dao.Detail) error {
+	ddd, _ := base64.StdEncoding.DecodeString(params.Img) //成图片文件并把文件写入到buffer
+	fmt.Println(ddd)
+	err2 := ioutil.WriteFile("./output.jpg", ddd, 0666)   //buffer输出到jpg文件中（不做处理，直接写到文件）
+	if err2 != nil{
+		fmt.Println(err2)
+		return err2
+	}
+
 	affected, err := db.Omit("sample_id").Insert(params)
 	if err != nil {
 		fmt.Println(err)
@@ -124,3 +204,5 @@ func InserDailyDetail(db *xorm.Engine, params dao.Detail) error {
 	}
 	return errors.New("insert failed!")
 }
+
+

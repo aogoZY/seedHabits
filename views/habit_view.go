@@ -69,7 +69,6 @@ func UpdatePunchRecordHandler(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println(param)
 	dbpg, _ := dao.ConnectPgDB()
 	err = services.UpdateDailyDetail(dbpg, param)
 	if err != nil {
