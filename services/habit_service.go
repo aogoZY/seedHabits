@@ -175,7 +175,7 @@ func WriteFile(base64_image_content string) (path string, err error) {
 	var file string = dir + "/images/" + curFileStr + strconv.Itoa(n) + "." + fileType
 	fmt.Println("file", file)
 
-	dataImgPath := strconv.Itoa(n) + "." + fileType
+	dataImgPath := curFileStr + strconv.Itoa(n) + "." + fileType
 	byte, _ := base64.StdEncoding.DecodeString(base64Str)
 
 	err = ioutil.WriteFile(file, byte, 0666)
