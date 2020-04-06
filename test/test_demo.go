@@ -25,4 +25,7 @@ func main() {
 
 	fmt.Printf("firstOfMonth:%v\n",firstOfMonth)
 	fmt.Printf("lastOfMonth:%v\n",lastOfMonth)
+
+	str := "/var/www/html/aogo/seedHabits/images/158618123006229642477069.jpeg"
+
 }

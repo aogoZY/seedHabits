@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"os"
 	"regexp"
 	"seedHabits/dao"
 	"strconv"
@@ -128,31 +129,33 @@ func UpdateDailyDetail(db *xorm.Engine, params dao.Detail) error {
 	//	return err2
 	//}
 	path, err := WriteFile(params.Img)
-	if err !=nil{
+	if err != nil {
 		return err
 	}
 	fmt.Println(path)
 	params.Img = path
 
-	affected,err := db.Cols("word","img").Where("sample_id= ?",params.SampleId).Update(&params)
-	fmt.Printf("affected:%v",affected)
-	if err!=nil{
+	affected, err := db.Cols("word", "img").Where("sample_id= ?", params.SampleId).Update(&params)
+	fmt.Printf("affected:%v", affected)
+	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-	if affected == 1{
-		fmt.Printf("affected:%v",affected)
+	if affected == 1 {
+		fmt.Printf("affected:%v", affected)
 		return nil
 	}
 	return errors.New("update failed!")
 }
 
-func WriteFile(base64_image_content string) (path string,err error) {
+func WriteFile(base64_image_content string) (path string, err error) {
 
 	b, err := regexp.MatchString(`^data:\s*image\/(\w+);base64,`, base64_image_content)
 	if !b {
-		return "",err
+		return "", err
 	}
+
+	//data:image/jpeg;base64,/9j/4R/+RXhpZgAATU0AKgAAA
 
 	re, _ := regexp.Compile(`^data:\s*image\/(\w+);base64,`)
 	allData := re.FindAllSubmatch([]byte(base64_image_content), 2)
@@ -160,48 +163,46 @@ func WriteFile(base64_image_content string) (path string,err error) {
 
 	base64Str := re.ReplaceAllString(base64_image_content, "")
 
-
 	curFileStr := strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	n := r.Intn(99999)
 
-	//dir, err := os.Getwd()
-	//fmt.Println(dir)
+	dir, err := os.Getwd()
+	fmt.Println(dir)
 
+	//  /var/www/html/aogo/seedHabits/images/158618123006229642477069.jpeg
+	var file string = dir + "/images/" + curFileStr + strconv.Itoa(n) + "." + fileType
+	fmt.Println("file", file)
 
-	var file string = "/images/" + curFileStr + strconv.Itoa(n) + "." + fileType
-	fmt.Println("file",file)
+	dataImgPath := strconv.Itoa(n) + "." + fileType
 	byte, _ := base64.StdEncoding.DecodeString(base64Str)
 
 	err = ioutil.WriteFile(file, byte, 0666)
 	if err != nil {
 		log.Println(err)
-		return "",err
+		return "", err
 	}
-	return file,nil
+	return dataImgPath, nil
 }
 
 // 新建打卡记录
 func InserDailyDetail(db *xorm.Engine, params dao.Detail) error {
 	path, err := WriteFile(params.Img)
-	if err !=nil{
+	if err != nil {
 		return err
 	}
 	fmt.Println(path)
 	params.Img = path
-
 
 	affected, err := db.Omit("sample_id").Insert(params)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-	if affected > 0{
-		fmt.Println("affected:",affected)
+	if affected > 0 {
+		fmt.Println("affected:", affected)
 		return nil
 	}
 	return errors.New("insert failed!")
 }
-
-
