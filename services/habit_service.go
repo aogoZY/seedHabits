@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"os"
 	"regexp"
 	"seedHabits/dao"
 	"strconv"
@@ -167,11 +166,11 @@ func WriteFile(base64_image_content string) (path string,err error) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	n := r.Intn(99999)
 
-	dir, err := os.Getwd()
-	fmt.Println(dir)
+	//dir, err := os.Getwd()
+	//fmt.Println(dir)
 
 
-	var file string = dir + "/images/" + curFileStr + strconv.Itoa(n) + "." + fileType
+	var file string = "/images/" + curFileStr + strconv.Itoa(n) + "." + fileType
 	fmt.Println("file",file)
 	byte, _ := base64.StdEncoding.DecodeString(base64Str)
 
@@ -192,7 +191,7 @@ func InserDailyDetail(db *xorm.Engine, params dao.Detail) error {
 	fmt.Println(path)
 	params.Img = path
 
-	
+
 	affected, err := db.Omit("sample_id").Insert(params)
 	if err != nil {
 		fmt.Println(err)
