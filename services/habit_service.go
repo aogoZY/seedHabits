@@ -185,14 +185,14 @@ func WriteFile(base64_image_content string) (path string,err error) {
 
 // 新建打卡记录
 func InserDailyDetail(db *xorm.Engine, params dao.Detail) error {
-	ddd, _ := base64.StdEncoding.DecodeString(params.Img) //成图片文件并把文件写入到buffer
-	fmt.Println(ddd)
-	err2 := ioutil.WriteFile("./output.jpg", ddd, 0666)   //buffer输出到jpg文件中（不做处理，直接写到文件）
-	if err2 != nil{
-		fmt.Println(err2)
-		return err2
+	path, err := WriteFile(params.Img)
+	if err !=nil{
+		return err
 	}
+	fmt.Println(path)
+	params.Img = path
 
+	
 	affected, err := db.Omit("sample_id").Insert(params)
 	if err != nil {
 		fmt.Println(err)
