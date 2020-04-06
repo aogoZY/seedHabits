@@ -134,6 +134,7 @@ func UpdateDailyDetail(db *xorm.Engine, params dao.Detail) error {
 	}
 	fmt.Println(path)
 	params.Img = path
+	fmt.Println(params.Img)
 
 	affected, err := db.Cols("word", "img").Where("sample_id= ?", params.SampleId).Update(&params)
 	fmt.Printf("affected:%v", affected)
@@ -194,6 +195,7 @@ func InserDailyDetail(db *xorm.Engine, params dao.Detail) error {
 	}
 	fmt.Println(path)
 	params.Img = path
+	fmt.Println(params.Img)
 
 	affected, err := db.Omit("sample_id").Insert(params)
 	if err != nil {

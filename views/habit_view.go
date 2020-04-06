@@ -42,7 +42,6 @@ func PunchHabitHandler(c *gin.Context) {
 	fmt.Println("habit_id :", param.HabitId)
 	fmt.Println("user_id:", param.UserId)
 	dbpg, _ := dao.ConnectPgDB()
-	fmt.Printf("%+v\n", param)
 	err = services.InserDailyDetail(dbpg, param)
 	if err != nil {
 		fmt.Println(err)
