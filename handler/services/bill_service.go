@@ -3,8 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
-	"github.com/go-xorm/xorm"
-	"seedHabits/dao"
+	"seedHabits/handler/dao"
 	"strconv"
 )
 
@@ -15,8 +14,8 @@ const (
 	Pay    int = 0 //支出
 )
 
-func GetBillLabelList(db *xorm.Engine) (res []dao.Label, err error) {
-	err = db.Find(&res)
+func GetBillLabelList() (res []dao.Label, err error) {
+	err = dao.DBX.Find(&res)
 	if err != nil {
 		fmt.Println(err)
 		return res, err
@@ -24,8 +23,8 @@ func GetBillLabelList(db *xorm.Engine) (res []dao.Label, err error) {
 	return res, nil
 }
 
-func InsertBillRecord(db *xorm.Engine, params dao.BillRecord) (err error) {
-	affected, err := db.Omit("sample_id").Insert(&params)
+func InsertBillRecord(params dao.BillRecord) (err error) {
+	affected, err := dao.DBX.Omit("sample_id").Insert(&params)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -36,7 +35,7 @@ func InsertBillRecord(db *xorm.Engine, params dao.BillRecord) (err error) {
 	return errors.New("insert failed!")
 }
 
-func GetAccountRest(db *xorm.Engine, user_id int) (res dao.AccountRestResult, err error) {
+func GetAccountRest(user_id int) (res dao.AccountRestResult, err error) {
 	billRecord := new(dao.BillRecord)
 	fmt.Printf("billRecord:%+v\n", billRecord)
 	var accountPayment dao.AccountPayment
@@ -44,19 +43,19 @@ func GetAccountRest(db *xorm.Engine, user_id int) (res dao.AccountRestResult, er
 	var total float64
 	for _, paymentItem := range PaymentList {
 		fmt.Println(paymentItem)
-		GetMoney, err := db.Where("account_id = ? and type = ? and user_id = ?", paymentItem, Income, user_id).Sum(billRecord, "money")
+		GetMoney, err := dao.DBX.Where("account_id = ? and type = ? and user_id = ?", paymentItem, Income, user_id).Sum(billRecord, "money")
 		fmt.Println(GetMoney)
 		if err != nil {
 			fmt.Println(err)
 			return res, err
 		}
-		PayMoney, err := db.Where("account_id = ? and type = ? and user_id = ?", paymentItem, Pay, user_id).Sum(billRecord, "money")
+		PayMoney, err := dao.DBX.Where("account_id = ? and type = ? and user_id = ?", paymentItem, Pay, user_id).Sum(billRecord, "money")
 		fmt.Println(PayMoney)
 		RestbyPaymentItem := GetMoney - PayMoney
 		fmt.Println(RestbyPaymentItem)
 		accountPayment.Rest = RestbyPaymentItem
 		account := &dao.Account{SampleId: paymentItem}
-		_, err = db.Get(account)
+		_, err = dao.DBX.Get(account)
 		if err != nil {
 			fmt.Println(err)
 			return res, err
@@ -72,10 +71,10 @@ func GetAccountRest(db *xorm.Engine, user_id int) (res dao.AccountRestResult, er
 	return res, nil
 }
 
-func GetTotalAndItemListByMonth(db *xorm.Engine, user_id int, date string, account_id int, account_name string) (res dao.GetItemByAccountNameRes, err error) {
+func GetTotalAndItemListByMonth(user_id int, date string, account_id int, account_name string) (res dao.GetItemByAccountNameRes, err error) {
 	billRecord := make([]dao.BillRecord, 0)
 	startDate, endDate, _ := GetStartDayAndEndDayByMonth(date)
-	session := db.Desc("create_time").Where("user_id =? and create_time > ? and create_time < ?", user_id, startDate, endDate)
+	session := dao.DBX.Desc("create_time").Where("user_id =? and create_time > ? and create_time < ?", user_id, startDate, endDate)
 	if account_id != 0 && account_name != "" {
 		session = session.Where("account_id = ? and account_name = ?", account_id, account_name)
 	}
@@ -90,14 +89,14 @@ func GetTotalAndItemListByMonth(db *xorm.Engine, user_id int, date string, accou
 	res.ItemList = billRecord
 	bill := new(dao.BillRecord)
 
-	sessionPay := db.Where("user_id =? and create_time > ? and create_time < ?  and type = ?", user_id, startDate, endDate, Pay)
+	sessionPay := dao.DBX.Where("user_id =? and create_time > ? and create_time < ?  and type = ?", user_id, startDate, endDate, Pay)
 	if account_id != 0 && account_name != "" {
 		sessionPay = sessionPay.Where("account_id = ? ", account_id)
 	}
 	pay, err := sessionPay.Sum(bill, "money")
 	fmt.Printf("pay: %v\n", pay)
 
-	sessionIncome := db.Where("user_id =? and create_time > ? and create_time < ?  and type = ?", user_id, startDate, endDate, Income)
+	sessionIncome := dao.DBX.Where("user_id =? and create_time > ? and create_time < ?  and type = ?", user_id, startDate, endDate, Income)
 	if account_id != 0 && account_name != "" {
 		sessionIncome = sessionIncome.Where("account_id=?", account_id)
 	}
@@ -122,18 +121,18 @@ func GetRearchWayById(id int) (value string) {
 	}
 }
 
-func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int, PayOrGet int) (res []dao.PieRes, err error) {
+func GetPieByType(user_id int, date string, search_type int, PayOrGet int) (res []dao.PieRes, err error) {
 	startDate, endDate, _ := GetStartDayAndEndDayByMonth(date)
 
 	search_field := GetRearchWayById(search_type)
 	fmt.Println(search_field)
 	billRecord := new(dao.BillRecord)
-	pay, err := pg.Where("user_id =? and type = ? and create_time < ? and create_time > ?", user_id, PayOrGet, endDate, startDate).Sum(billRecord, "money")
+	pay, err := dao.DBX.Where("user_id =? and type = ? and create_time < ? and create_time > ?", user_id, PayOrGet, endDate, startDate).Sum(billRecord, "money")
 	fmt.Printf("all total:%v\n", pay)
 
 	sql := fmt.Sprintf("select %s,sum(money) from bill_record where user_id =%v and type = %v and create_time < '%s' and create_time>'%s' group by(%s)", search_field, user_id, PayOrGet, endDate, startDate, search_field)
 	fmt.Println(sql)
-	results, err := pg.SQL(sql).QueryString()
+	results, err := dao.DBX.SQL(sql).QueryString()
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -159,18 +158,18 @@ func GetPieByType(pg *xorm.Engine, user_id int, date string, search_type int, Pa
 	res = PieList
 	return res, nil
 
-	//sum, err := pg.Table("bill_record").GroupBy("account_id").Where("user_id =?", user_id).Sum(billRecord, "money")
+	//sum, err := dao.DBX.Table("bill_record").GroupBy("account_id").Where("user_id =?", user_id).Sum(billRecord, "money")
 	//fmt.Printf("sum:%v",sum)
 
 	//select account_name,sum(money) from  bill_record where user_id = 1 and type = 0 group by(account_name);
 	//
-	//	pg.GroupBy("account_id").Find(&billRecord)
+	//	dao.DBX.GroupBy("account_id").Find(&billRecord)
 }
 
-func UpdateBillItem(pg *xorm.Engine, Params dao.BillRecord) error {
+func UpdateBillItem(Params dao.BillRecord) error {
 	fmt.Println("sapmleId", Params.SampleId)
 	sample_id := Params.SampleId
-	affected, err := pg.Cols("type", "label_id", "label_name", "label_img", "money", "account_id", "account_name", "comment","create_time").In("sample_id", sample_id).Update(&Params)
+	affected, err := dao.DBX.Cols("type", "label_id", "label_name", "label_img", "money", "account_id", "account_name", "comment", "create_time").In("sample_id", sample_id).Update(&Params)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -181,9 +180,9 @@ func UpdateBillItem(pg *xorm.Engine, Params dao.BillRecord) error {
 	return errors.New("update failed")
 }
 
-func DeleteBillItem(pg *xorm.Engine, user_id int, sample_id int) (err error) {
+func DeleteBillItem(user_id int, sample_id int) (err error) {
 	billRecord := &dao.BillRecord{SampleId: sample_id, UserId: user_id}
-	affected, err := pg.Delete(billRecord)
+	affected, err := dao.DBX.Delete(billRecord)
 	fmt.Printf("affected:%v", affected)
 	if err != nil {
 		fmt.Println(err)

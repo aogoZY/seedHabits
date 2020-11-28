@@ -1,10 +1,10 @@
-package router
+package handler
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"seedHabits/views"
+	"seedHabits/handler/views"
 )
 
 func InitRouter() *gin.Engine {
@@ -18,11 +18,15 @@ func InitRouter() *gin.Engine {
 
 	router.POST("/user/login", views.LoginHandler) //登录
 
+	router.POST("/user/info/upload", views.AddUserInfoHandler) //新增用户信息
+
+	router.GET("/user/info/get", views.GetUserInfoHandler) //查询用户信息
+
 	router.GET("/habit/list/:userId", views.GetHabitListHandler) //返回用户习惯列表
 
 	router.POST("/punch", views.PunchHabitHandler) //打卡
 
-	router.POST("/punch/update", views.UpdatePunchRecordHandler)  //更新当日打卡内容
+	router.POST("/punch/update", views.UpdatePunchRecordHandler) //更新当日打卡内容
 
 	router.GET("habit/history", views.GetHabitHistoryHandler) //获取某习惯的打卡历史记录
 
@@ -63,4 +67,27 @@ func Cors() gin.HandlerFunc {
 		// 处理请求
 		c.Next()
 	}
+}
+
+func registerUserService(group *gin.RouterGroup) {
+	user := group.Group("/user")
+	{
+		user.POST("/user/login", views.LoginHandler) //登录
+	}
+}
+
+func applyApiRoutes(engine *gin.Engine) {
+	api := engine.Group("api/v1")
+	api.Use()
+	registerUserService(api)
+}
+
+func setupRoute(g *gin.Engine) {
+	applyApiRoutes(g)
+	g.GET("/ping", func(c *gin.Context) {
+		c.String(200, "pong")
+	})
+	g.GET("/_healthy_check", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "ok"})
+	})
 }

@@ -53,8 +53,7 @@ func query(db *sql.DB)(name string,time string,err error){
 	
 		return name,time,nil
 	}
-	
-}
+
 
 func insert(db *sql.DB){
 	stmt,err := db.Prepare("insert into person(name,time) values($1,$2)")

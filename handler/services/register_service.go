@@ -3,14 +3,12 @@ package services
 import (
 	"errors"
 	"fmt"
-	"github.com/go-xorm/xorm"
-	"seedHabits/dao"
+	"seedHabits/handler/dao"
 	"time"
 )
 
-func UserRegister(params dao.Users) (msg string, err error) {
-	dbpg, _ := dao.ConnectPgDB()
-	registerFlag, err := queryRegister(dbpg, params.Name)
+func UserRegister(params dao.TUsers) (msg string, err error) {
+	registerFlag, err := queryRegister(params.Name)
 	if err != nil {
 		fmt.Println(err)
 		return "", err
@@ -19,10 +17,10 @@ func UserRegister(params dao.Users) (msg string, err error) {
 		msg = "u have registered!"
 		return msg, nil
 	}
-	res, UserId, err := insertRegister(dbpg, params.Name, params.Password)
+	res, UserId, err := insertRegister(params.Name, params.Password)
 	tNow := time.Now()
 	timeNow := tNow.Format("2006-01-02 15:04:05")
-	err = insertUserHabitInfo(dbpg, UserId, timeNow)
+	err = insertUserHabitInfo(UserId, timeNow)
 	if err != nil {
 		fmt.Println(err)
 		return "", err
@@ -34,18 +32,18 @@ func UserRegister(params dao.Users) (msg string, err error) {
 	return "", nil
 }
 
-func insertRegister(db *xorm.Engine, name string, pwd string) (bool, int, error) {
-	var registerUser dao.Users
+func insertRegister(name string, pwd string) (bool, int, error) {
+	var registerUser dao.TUsers
 	var sampleid int
 	registerUser.Name = name
 	registerUser.Password = pwd
-	affected, err := db.Insert(&registerUser)
+	affected, err :=  dao.DBX.Insert(&registerUser)
 	if err != nil {
 		fmt.Println(err)
 		return false, 0, err
 	}
 	if affected > 0 {
-		_, err = db.Sql("select sampleid from users where name=?", name).Get(&sampleid)
+		_, err =  dao.DBX.Where("name = ?",name).Cols("sampleid").Get(&sampleid)
 		if err != nil {
 			fmt.Println(err)
 			return false, 0, err
@@ -55,8 +53,8 @@ func insertRegister(db *xorm.Engine, name string, pwd string) (bool, int, error)
 	return false, 0, nil
 }
 
-func queryRegister(db *xorm.Engine, name string) (bool, error) {
-	has, err := db.Table("users").Where("name=?", name).Exist()
+func queryRegister(name string) (bool, error) {
+	has, err :=  dao.DBX.Table("users").Where("name=?", name).Exist()
 	if err != nil {
 		return false, err
 	}
@@ -66,7 +64,7 @@ func queryRegister(db *xorm.Engine, name string) (bool, error) {
 	return false, nil
 }
 
-func insertUserHabitInfo(db *xorm.Engine, id int, time string) error {
+func insertUserHabitInfo(id int, time string) error {
 	userHabitInfos := make([]dao.Info, 3)
 	userHabitInfos[0].HabitId = 4
 	userHabitInfos[0].HabitName = "记账"
@@ -83,7 +81,7 @@ func insertUserHabitInfo(db *xorm.Engine, id int, time string) error {
 	userHabitInfos[2].UserId = id
 	userHabitInfos[2].CreateTime = time
 
-	affected, err := db.Insert(&userHabitInfos)
+	affected, err := dao.DBX.Insert(&userHabitInfos)
 	if err != nil {
 		fmt.Println(err)
 		return err

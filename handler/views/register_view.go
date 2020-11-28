@@ -2,8 +2,8 @@ package views
 
 import (
 	"github.com/gin-gonic/gin"
-	"seedHabits/dao"
-	"seedHabits/services"
+	"seedHabits/handler/dao"
+	"seedHabits/handler/services"
 )
 
 func HelloHandler(c *gin.Context) {
@@ -11,11 +11,11 @@ func HelloHandler(c *gin.Context) {
 }
 
 func RegisterHandler(c *gin.Context) {
-	var params dao.Users
+	var params dao.TUsers
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
 		c.JSON(200, gin.H{
-			"msg":  "绑定失败",
+			"msg":  err.Error(),
 			"code": 1,
 		})
 		return
@@ -32,7 +32,7 @@ func RegisterHandler(c *gin.Context) {
 	res, err := services.UserRegister(params)
 	if err != nil {
 		c.JSON(200, gin.H{
-			"msg":  err,
+			"msg":  err.Error(),
 			"code": 1,
 		})
 		return

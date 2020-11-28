@@ -2,9 +2,31 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9b53fe1a-9ab7-4997-9029-10d08a4afd3b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/handler/dao/base.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/handler/services/login_service.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/handler/views/login_view.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/habit_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/habit_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/habit_view.go" beforeDir="false" afterPath="$PROJECT_DIR$/views/habit_view.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dao/base.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dao/bill.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/dao/bill.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dao/detail.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/dao/detail.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dao/login.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/dao/login.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dao/register.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/dao/register.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/router/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/router.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/bill_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/services/bill_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/getDaysRangeByMonth.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/services/getDaysRangeByMonth.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/habit_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/services/habit_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/login_service.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/register_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/services/register_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/validParams.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/services/validParams.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/testPg/testOther.go" beforeDir="false" afterPath="$PROJECT_DIR$/test/testPg/testOther.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_demo.go" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_demo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/views/bill_view.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/views/bill_view.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/views/habit_view.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/views/habit_view.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/views/login_view.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/views/register_view.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/views/register_view.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -45,9 +67,10 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/handler" />
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/dao" />
       <recent name="$PROJECT_DIR$/router" />
-      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/views" />
     </key>
   </component>
@@ -66,25 +89,62 @@
   <component name="RunManager" selected="Go Build.go build seedHabits">
     <configuration name="go build seedHabits" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="seedHabits" />
-      <working_directory value="$PROJECT_DIR$/" />
+      <working_directory value="$PROJECT_DIR$" />
       <kind value="PACKAGE" />
       <filePath value="$PROJECT_DIR$/main.go" />
       <package value="seedHabits" />
       <directory value="$PROJECT_DIR$/" />
       <method v="2" />
     </configuration>
-    <configuration name="go build test_demo.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+    <configuration name="go build seedHabits/test/testPg" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="seedHabits" />
-      <working_directory value="$PROJECT_DIR$/" />
+      <working_directory value="$PROJECT_DIR$" />
       <kind value="FILE" />
-      <filePath value="$PROJECT_DIR$/test/test_demo.go" />
+      <filePath value="$PROJECT_DIR$/test/testPg/test_log.go" />
+      <package value="seedHabits/test/testPg" />
       <directory value="$PROJECT_DIR$/" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestConnect in seedHabits/dao" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="seedHabits" />
+      <working_directory value="$PROJECT_DIR$/dao" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="seedHabits/dao" />
+      <directory value="$PROJECT_DIR$/" />
+      <filePath value="$PROJECT_DIR$/" />
+      <pattern value="^TestConnect$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestGetApiLogger in seedHabits/sdk/log" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="seedHabits" />
+      <working_directory value="$PROJECT_DIR$/sdk/log" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="seedHabits/sdk/log" />
+      <directory value="$PROJECT_DIR$/" />
+      <filePath value="$PROJECT_DIR$/" />
+      <pattern value="^TestGetApiLogger$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestInsert in seedHabits/services" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="seedHabits" />
+      <working_directory value="$PROJECT_DIR$/services" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="seedHabits/services" />
+      <directory value="$PROJECT_DIR$/" />
+      <filePath value="$PROJECT_DIR$/" />
+      <pattern value="^TestInsert$" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Go Build.go build seedHabits" />
-        <item itemvalue="Go Build.go build test_demo.go" />
+        <item itemvalue="Go Test.TestConnect in seedHabits/dao" />
+        <item itemvalue="Go Test.TestGetApiLogger in seedHabits/sdk/log" />
+        <item itemvalue="Go Build.go build seedHabits/test/testPg" />
+        <item itemvalue="Go Test.TestInsert in seedHabits/services" />
       </list>
     </recent_temporary>
   </component>
@@ -112,9 +172,69 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/services/register_service.go</url>
+          <url>file://$PROJECT_DIR$/handler/services/register_service.go</url>
           <line>2</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/sdk/log/logger_test.go</url>
+          <line>5</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/sdk/log/logger_test.go</url>
+          <line>14</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/sdk/log/logger.go</url>
+          <line>34</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/sdk/log/logger.go</url>
+          <line>35</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/sdk/log/logger.go</url>
+          <line>89</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/handler/server.go</url>
+          <line>2</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/main.go</url>
+          <line>40</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/main.go</url>
+          <line>42</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/conf/conf.go</url>
+          <line>40</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/conf/conf.go</url>
+          <line>39</line>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/handler/server.go</url>
+          <line>41</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/main.go</url>
+          <line>56</line>
+          <option name="timeStamp" value="13" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

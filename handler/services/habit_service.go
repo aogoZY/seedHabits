@@ -1,23 +1,15 @@
 package services
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/go-xorm/xorm"
-	"io/ioutil"
-	"log"
-	"math/rand"
-	"os"
-	"regexp"
-	"seedHabits/dao"
-	"strconv"
+	"seedHabits/handler/dao"
 	"time"
 )
 
-func GetHabitListByUserId(db *xorm.Engine, userId int) (res []dao.UserHabits, err error) {
+func GetHabitListByUserId(userId int) (res []dao.UserHabits, err error) {
 	HabitList := make([]dao.Info, 0)
-	err = db.Where("user_id=?", userId).Find(&HabitList)
+	err = dao.DBX.Where("user_id=?", userId).Find(&HabitList)
 	if err != nil {
 		fmt.Println(err)
 		return res, err
@@ -32,10 +24,10 @@ func GetHabitListByUserId(db *xorm.Engine, userId int) (res []dao.UserHabits, er
 	return res, nil
 }
 
-func GetHistoryByUserIdAndHabitId(db *xorm.Engine, user_id int, habit_id int) (res []dao.HabitHistoryRes, err error) {
+func GetHistoryByUserIdAndHabitId(user_id int, habit_id int) (res []dao.HabitHistoryRes, err error) {
 	var habitHistoryInfo []dao.HabitHistoryInfo
 	var habitHistoryItem dao.HabitHistoryRes
-	err = db.Table("detail").Desc("update_time").Where("user_id = ? ", user_id).And("habit_id = ?", habit_id).Find(&habitHistoryInfo)
+	err = dao.DBX.Table("detail").Desc("update_time").Where("user_id = ? ", user_id).And("habit_id = ?", habit_id).Find(&habitHistoryInfo)
 	if err != nil {
 		fmt.Println(err)
 		return res, err
@@ -53,10 +45,10 @@ func GetHistoryByUserIdAndHabitId(db *xorm.Engine, user_id int, habit_id int) (r
 
 }
 
-func InsertNewHabit(db *xorm.Engine, habitName string, img string) (res int, err error) {
+func InsertNewHabit(habitName string, img string) (res int, err error) {
 
 	sql := "insert into habit (habit_img,habit_name) values (?,?)"
-	_, err = db.Exec(sql, img, habitName)
+	_, err =  dao.DBX.Exec(sql, img, habitName)
 
 	//habit := Habit{HabitName:habitName,HabitImg:img}
 	//affected, err := db.Insert(habit).Omit("habit_id")
@@ -65,7 +57,7 @@ func InsertNewHabit(db *xorm.Engine, habitName string, img string) (res int, err
 		return 0, err
 	}
 	var habit_id int
-	has, err := db.Table("habit").Cols("habit_id").Where("habit_name=? and habit_img = ?", habitName, img).Get(&habit_id)
+	has, err :=  dao.DBX.Table("habit").Cols("habit_id").Where("habit_name=? and habit_img = ?", habitName, img).Get(&habit_id)
 
 	if err != nil {
 		fmt.Println(err)
@@ -77,12 +69,12 @@ func InsertNewHabit(db *xorm.Engine, habitName string, img string) (res int, err
 	return 0, errors.New("新建习惯失败")
 }
 
-func InsertInfo(db *xorm.Engine, params dao.AddHabitParams, id int) error {
+func InsertInfo(params dao.AddHabitParams, id int) error {
 	tNow := time.Now()
 	timeNow := tNow.Format("2006-01-02 15:04:05")
 
 	info := dao.Info{UserId: params.UserId, HabitId: id, CreateTime: timeNow, HabitName: params.HabitName, HabitImg: params.Img}
-	affected, err := db.Insert(&info)
+	affected, err :=  dao.DBX.Insert(&info)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -93,7 +85,7 @@ func InsertInfo(db *xorm.Engine, params dao.AddHabitParams, id int) error {
 	return errors.New("insert failed")
 }
 
-func UpdateDailyDetail(db *xorm.Engine, params dao.Detail) error {
+func UpdateDailyDetail(params dao.Detail) error {
 	//nTime := time.Now()
 	//updateTime := nTime.Format("2006-01-02 15:04:05")
 	//fmt.Printf("day:%v\n", updateTime)
@@ -136,7 +128,7 @@ func UpdateDailyDetail(db *xorm.Engine, params dao.Detail) error {
 	params.Img = path
 	fmt.Println(params.Img)
 
-	affected, err := db.Cols("word", "img").Where("sample_id= ?", params.SampleId).Update(&params)
+	affected, err :=  dao.DBX.Cols("word", "img").Where("sample_id= ?", params.SampleId).Update(&params)
 	fmt.Printf("affected:%v", affected)
 	if err != nil {
 		fmt.Println(err)
@@ -149,46 +141,9 @@ func UpdateDailyDetail(db *xorm.Engine, params dao.Detail) error {
 	return errors.New("update failed!")
 }
 
-func WriteFile(base64_image_content string) (path string, err error) {
-
-	b, err := regexp.MatchString(`^data:\s*image\/(\w+);base64,`, base64_image_content)
-	if !b {
-		return "", err
-	}
-
-	//data:image/jpeg;base64,/9j/4R/+RXhpZgAATU0AKgAAA
-
-	re, _ := regexp.Compile(`^data:\s*image\/(\w+);base64,`)
-	allData := re.FindAllSubmatch([]byte(base64_image_content), 2)
-	fileType := string(allData[0][1]) //png ，jpeg 后缀获取
-
-	base64Str := re.ReplaceAllString(base64_image_content, "")
-
-	curFileStr := strconv.FormatInt(time.Now().UnixNano(), 10)
-
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	n := r.Intn(99999)
-
-	dir, err := os.Getwd()
-	fmt.Println(dir)
-
-	//  /var/www/html/aogo/seedHabits/images/158618123006229642477069.jpeg
-	var file string = dir + "/images/" + curFileStr + strconv.Itoa(n) + "." + fileType
-	fmt.Println("file", file)
-
-	dataImgPath := curFileStr + strconv.Itoa(n) + "." + fileType
-	byte, _ := base64.StdEncoding.DecodeString(base64Str)
-
-	err = ioutil.WriteFile(file, byte, 0666)
-	if err != nil {
-		log.Println(err)
-		return "", err
-	}
-	return dataImgPath, nil
-}
 
 // 新建打卡记录
-func InserDailyDetail(db *xorm.Engine, params dao.Detail) error {
+func InserDailyDetail(params dao.Detail) error {
 	path, err := WriteFile(params.Img)
 	if err != nil {
 		return err
@@ -197,7 +152,7 @@ func InserDailyDetail(db *xorm.Engine, params dao.Detail) error {
 	params.Img = path
 	fmt.Println(params.Img)
 
-	affected, err := db.Omit("sample_id").Insert(params)
+	affected, err :=  dao.DBX.Omit("sample_id").Insert(params)
 	if err != nil {
 		fmt.Println(err)
 		return err

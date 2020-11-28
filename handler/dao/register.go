@@ -7,3 +7,4 @@ type Info struct {
 	HabitName  string `json:"habit_name"`
 	HabitImg   string `json:"habit_img"`
 }
+

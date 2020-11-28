@@ -3,18 +3,17 @@ package views
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"seedHabits/dao"
-	"seedHabits/services"
+	"seedHabits/handler/dao"
+	"seedHabits/handler/services"
 	"strconv"
 )
 
 func GetBillLabelListHandler(c *gin.Context) {
-	pg, _ := dao.ConnectPgDB()
-	res, err := services.GetBillLabelList(pg)
+	res, err := services.GetBillLabelList()
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(200, gin.H{
-			"msg":  err,
+			"msg":  err.Error(),
 			"code": 1,
 		})
 		return
@@ -33,17 +32,16 @@ func RecordBillHandler(c *gin.Context) {
 		fmt.Println(err)
 		c.JSON(200, gin.H{
 			"code": 0,
-			"msg":  err,
+			"msg":  err.Error(),
 		})
 		return
 	}
-	db, _ := dao.ConnectPgDB()
-	err = services.InsertBillRecord(db, Params)
+	err = services.InsertBillRecord(Params)
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(200, gin.H{
 			"code": 0,
-			"msg":  err,
+			"msg":  err.Error(),
 		})
 		return
 	}
@@ -55,14 +53,13 @@ func RecordBillHandler(c *gin.Context) {
 
 func GetSumByAccountIdHandler(c *gin.Context) {
 	userIdStr := c.Query("user_id")
-	pg, _ := dao.ConnectPgDB()
 	user_id, err := strconv.Atoi(userIdStr)
 	fmt.Println(user_id)
-	res, err := services.GetAccountRest(pg, user_id)
+	res, err := services.GetAccountRest(user_id)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"code": 1,
-			"msg":  err,
+			"msg":  err.Error(),
 		})
 		return
 	}
@@ -83,12 +80,11 @@ func GetBillListByMonthHandler(c *gin.Context) {
 	fmt.Printf("accpunt_id：%v", account_id)
 	fmt.Printf("accpunt_name：%v", account_name)
 
-	db, _ := dao.ConnectPgDB()
-	res, err := services.GetTotalAndItemListByMonth(db, user_id, date, account_id, account_name)
+	res, err := services.GetTotalAndItemListByMonth(user_id, date, account_id, account_name)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"code": 1,
-			"msg":  err,
+			"msg":  err.Error(),
 		})
 		return
 	}
@@ -108,13 +104,12 @@ func GetPieHandler(c *gin.Context) {
 	PayOrGet, _ := strconv.Atoi(payOrGetStr)
 
 	fmt.Println(user_id, date, search_type, PayOrGet)
-	pg, _ := dao.ConnectPgDB()
-	res, err := services.GetPieByType(pg, user_id, date, search_type, PayOrGet)
+	res, err := services.GetPieByType(user_id, date, search_type, PayOrGet)
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(200, gin.H{
 			"code": 1,
-			"msg":  err,
+			"msg":  err.Error(),
 		})
 		return
 	}
@@ -132,18 +127,17 @@ func UpdateBillRecordHandler(c *gin.Context) {
 		fmt.Println(err)
 		c.JSON(200, gin.H{
 			"code": 1,
-			"msg":  err,
+			"msg":  err.Error(),
 		})
 		return
 	}
 	fmt.Println("type", Params.Type)
-	pg, _ := dao.ConnectPgDB()
-	err = services.UpdateBillItem(pg, Params)
+	err = services.UpdateBillItem(Params)
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(200, gin.H{
 			"code": 1,
-			"msg":  err,
+			"msg":  err.Error(),
 		})
 		return
 	}
@@ -158,13 +152,12 @@ func DeleteBillRecordHandler(c *gin.Context) {
 	ItemIdStr := c.Query("sample_id")
 	user_id, _ := strconv.Atoi(UserIdStr)
 	item_id, _ := strconv.Atoi(ItemIdStr)
-	pg, _ := dao.ConnectPgDB()
-	err := services.DeleteBillItem(pg, user_id, item_id)
+	err := services.DeleteBillItem(user_id, item_id)
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(200, gin.H{
 			"code": 1,
-			"msg":  err,
+			"msg":  err.Error(),
 		})
 		return
 	}
