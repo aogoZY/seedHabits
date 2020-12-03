@@ -59,7 +59,7 @@ func (w *Worked) Main() {
 }
 
 func (w *Worked) Exit() error {
-	log.Logger.Warning("server dtop now ...")
+	log.Logger.Warning("server stop now ...")
 	w.Server.Stop()
 
 	if _, err := os.Stat(conf.Config.Server.Pid);

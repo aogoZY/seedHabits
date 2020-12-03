@@ -2,31 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9b53fe1a-9ab7-4997-9029-10d08a4afd3b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/handler/dao/base.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/handler/services/login_service.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/handler/views/login_view.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dao/base.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dao/bill.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/dao/bill.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dao/detail.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/dao/detail.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dao/login.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/dao/login.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dao/register.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/dao/register.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conf/conf.toml" beforeDir="false" afterPath="$PROJECT_DIR$/conf/conf.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handler/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handler/worker.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/worker.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/router/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/router.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/bill_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/services/bill_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/getDaysRangeByMonth.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/services/getDaysRangeByMonth.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/habit_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/services/habit_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/login_service.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/register_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/services/register_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/validParams.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/services/validParams.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/testPg/testOther.go" beforeDir="false" afterPath="$PROJECT_DIR$/test/testPg/testOther.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_demo.go" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_demo.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/bill_view.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/views/bill_view.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/habit_view.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/views/habit_view.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/login_view.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/register_view.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/views/register_view.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -207,16 +189,6 @@
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/main.go</url>
-          <line>40</line>
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/main.go</url>
-          <line>42</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/conf/conf.go</url>
           <line>40</line>
           <option name="timeStamp" value="10" />
@@ -233,8 +205,28 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/main.go</url>
-          <line>56</line>
-          <option name="timeStamp" value="13" />
+          <line>2</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/main.go</url>
+          <line>87</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/main.go</url>
+          <line>88</line>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$USER_HOME$/gopth/pkg/mod/github.com/kwanhur/go-svc@v1.1.3/svc/svc_other.go</url>
+          <line>21</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$USER_HOME$/gopth/pkg/mod/github.com/kwanhur/go-svc@v1.1.3/svc/svc_other.go</url>
+          <line>25</line>
+          <option name="timeStamp" value="18" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

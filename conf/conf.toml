@@ -1,6 +1,6 @@
 title = "seed-api api config"
 [Server]
-port = 18080
+port = 8001
 debugMode = false
 tokenDuration = 10
 pid = "/app/run/seed-api.pid"

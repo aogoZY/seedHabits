@@ -38,13 +38,13 @@ func (s *Server) Init() error {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 	setupRoute(engine)
-	addr := fmt.Sprintf("%s :%s", conf.Config.Server.Host, conf.Config.Server.Port)
+	addr := fmt.Sprintf("%s:%d", conf.Config.Server.Host, conf.Config.Server.Port)
 	s.server = &http.Server{Addr: addr, Handler: engine}
 	return nil
 }
 
 func (s *Server) Launch() {
-	log.Logger.Info("server started at %s", s.server.Addr)
+	log.Logger.Infof("server started at %s", s.server.Addr)
 	go func() {
 		if err := s.server.ListenAndServe(); err != nil {
 			log.Logger.Error(err)
