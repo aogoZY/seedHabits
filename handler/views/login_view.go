@@ -26,7 +26,8 @@ func LoginHandler(c *gin.Context) {
 		})
 		return
 	}
-	queryLoginRes, err := services.QueryLoginIn(params.Name, params.Password)
+	userService := services.GetUserService()
+	queryLoginRes, err := userService.QueryByNameAndPassword(params.Name, params.Password)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"msg":  err.Error(),
@@ -34,11 +35,11 @@ func LoginHandler(c *gin.Context) {
 		})
 		return
 	}
-	if queryLoginRes > 0 {
+	if queryLoginRes != nil {
 		c.JSON(200, gin.H{
 			"msg":  "登录成功",
 			"code": 0,
-			"data": gin.H{"userId": queryLoginRes},
+			"data": gin.H{"userId": queryLoginRes.Id},
 		})
 		return
 	}

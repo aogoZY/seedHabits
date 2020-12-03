@@ -73,6 +73,7 @@ func registerUserService(group *gin.RouterGroup) {
 	user := group.Group("/user")
 	{
 		user.POST("/user/login", views.LoginHandler) //登录
+
 	}
 }
 

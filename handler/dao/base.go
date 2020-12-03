@@ -36,5 +36,6 @@ func Init() {
 			}
 			log.Logger.Info("pong")
 		}
+		DBX.ShowSQL(true)
 	}
 }

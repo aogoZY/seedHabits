@@ -13,7 +13,7 @@ type Database struct {
 type DatabaseConfig struct {
 	Driver      string
 	Host        string
-	Port        string
+	Port        int
 	User        string
 	Password    string
 	DBName      string
@@ -22,7 +22,7 @@ type DatabaseConfig struct {
 
 func connDB(cfg *DatabaseConfig) (*Database, error) {
 	var Dbinstance = Database{}
-	connStr := fmt.Sprintf("dbname=%s host=%s user=%s password=%s port=%s sslmode=disable", cfg.DBName, cfg.Host, cfg.User, cfg.Password,cfg.Port)
+	connStr := fmt.Sprintf("dbname=%s host=%s user=%s password=%s port=%s sslmode=disable", cfg.DBName, cfg.Host, cfg.User, cfg.Password, cfg.Port)
 	db, err := sqlx.Open(cfg.Driver, connStr)
 	db.SetMaxOpenConns(cfg.MaxOpenConn)
 	if err != nil || db == nil {
