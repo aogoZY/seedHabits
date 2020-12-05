@@ -9,6 +9,6 @@ type TUsers struct {
 }
 
 func (d *TUsers) TableName() string {
-	return "users"
+	return "user_base_info"
 }
 

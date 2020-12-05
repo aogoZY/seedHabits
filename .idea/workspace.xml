@@ -4,10 +4,7 @@
     <list default="true" id="9b53fe1a-9ab7-4997-9029-10d08a4afd3b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/conf/conf.toml" beforeDir="false" afterPath="$PROJECT_DIR$/conf/conf.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handler/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/router.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handler/services/login_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/services/login_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handler/views/login_view.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/views/login_view.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sdk/dal/driver.go" beforeDir="false" afterPath="$PROJECT_DIR$/sdk/dal/driver.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handler/dao/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/dao/users.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

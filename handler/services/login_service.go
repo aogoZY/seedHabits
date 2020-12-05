@@ -16,7 +16,7 @@ func getUserService() *UserService {
 
 func (d *UserService)QueryLoginIn(name string, password string) (int, error) {
 	var sampleid int
-	_, err := dao.DBX.Table(d.Dao.TableName()).Where("where name=? and password=?", name, password).Cols("sample").Get(&sampleid)
+	_, err := dao.DBX.Table(d.Dao.TableName()).Where("where use_name=? and password=?", name, password).Cols("sample").Get(&sampleid)
 	if err != nil {
 		fmt.Println(err)
 		return 0, err
