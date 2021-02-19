@@ -3,8 +3,12 @@ package handler
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"net/http"
+	"seedHabits/handler/dao"
 	"seedHabits/handler/views"
+	"seedHabits/sdk/log"
 )
 
 func InitRouter() *gin.Engine {
@@ -72,14 +76,20 @@ func Cors() gin.HandlerFunc {
 func registerUserService(group *gin.RouterGroup) {
 	user := group.Group("/user")
 	{
-		user.POST("/user/login", views.LoginHandler) //登录
+		user.POST("/login", views.LoginHandler)             //登录
+		user.POST("/register", views.RegisterHandler)       //注册
+		user.POST("/info/upload", views.AddUserInfoHandler) //新增用户信息
+		user.GET("/info/get", views.GetUserInfoHandler)     //查询用户信息
 
 	}
 }
 
 func applyApiRoutes(engine *gin.Engine) {
 	api := engine.Group("api/v1")
-	api.Use()
+	log.Logger.Info(dao.DBX)
+	log.Logger.Info(dao.Tracer)
+	api.Use(dao.Tracer.Trace())
+
 	registerUserService(api)
 }
 
@@ -91,4 +101,6 @@ func setupRoute(g *gin.Engine) {
 	g.GET("/_healthy_check", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "ok"})
 	})
+	url := ginSwagger.URL("http://localhost:8001/swagger/doc.json")
+	g.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 }

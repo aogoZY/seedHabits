@@ -5,18 +5,26 @@ import (
 	"github.com/gin-gonic/gin"
 	"seedHabits/handler/dao"
 	"seedHabits/handler/services"
+	"seedHabits/sdk/log"
 	"strconv"
 )
 
+//@summary 用户模块
+//@description 用户登陆功能
+//@param LoginReq body dao.LoginReq true "用户名与密码"
+//@Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
+//@router /api/v1/user/login [post]
 func LoginHandler(c *gin.Context) {
-	var params dao.TUsers
-	err := c.ShouldBindJSON(&params)
+	var params dao.LoginReq
+	err := c.BindJSON(&params)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"code": 1,
 			"msg":  err.Error(),
 		})
 	}
+	log.Logger.Info("hello")
+	log.Logger.Info(params)
 	nameValidRes := services.ParamsValid(params.Name)
 	passwordValidRes := services.ParamsValid(params.Password)
 	if nameValidRes == false || passwordValidRes == false {
@@ -24,6 +32,7 @@ func LoginHandler(c *gin.Context) {
 			"code": 1,
 			"msg":  "输入参数不合法",
 		})
+		log.Logger.Error("aaaaa")
 		return
 	}
 	userService := services.GetUserService()
@@ -33,6 +42,7 @@ func LoginHandler(c *gin.Context) {
 			"msg":  err.Error(),
 			"code": 1,
 		})
+		log.Logger.Error("bbbbb")
 		return
 	}
 	if queryLoginRes != nil {
@@ -65,11 +75,16 @@ func AddUserInfoHandler(c *gin.Context) {
 	c.JSON(200, gin.H{"code": 0, "msg": "success"})
 }
 
+//@summary 用户模块
+//@description 查询用户信息功能
+//@param id query int true "用户id"
+//@Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
+//@router /api/v1/user/info/get [get]
 func GetUserInfoHandler(c *gin.Context) {
-	sample_id := c.Query("sample_id")
-	fmt.Println("sample_id", sample_id)
-	sample_id_int, _ := strconv.Atoi(sample_id)
-	res, err := services.GetUserInfo(sample_id_int)
+	id := c.Query("id")
+	fmt.Println("id", id)
+	id_int, _ := strconv.Atoi(id)
+	res, err := services.GetUserInfo(id_int)
 	if err != nil {
 		c.JSON(200, gin.H{"code": 1, "msg": err.Error()})
 		return

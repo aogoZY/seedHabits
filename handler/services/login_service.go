@@ -42,9 +42,9 @@ func AddUserInfo(params dao.TUsers) error {
 	return errors.New("insert user info failed")
 }
 
-func GetUserInfo(sample_id int) (res dao.TUsers, err error) {
+func GetUserInfo(id int) (res dao.TUsers, err error) {
 	var user dao.TUsers
-	has, err := dao.DBX.Where("sample_id=?", sample_id).Omit("password").Get(&user)
+	has, err := dao.DBX.Where("id=?", id).Omit("password").Get(&user)
 	if err != nil {
 		return res, err
 	}

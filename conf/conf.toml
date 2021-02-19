@@ -15,12 +15,18 @@ stdErr = true
 
 [Database]
 driver = "postgres"
-host = "localhost"
+host = "127.0.0.1"
 port = 5432
-user = "postgres"
+user = "zhouyang"
 password = ""
-dbname = "postgres"
+dbname = "zhouyang"
 
 [Memcache]
 cluster = []
 expire = 10
+
+[Tracer]
+Enable = true
+AgentHost = "127.0.0.1"
+AgentPort = "6831"
+ServiceName = "seedHabits"

@@ -9,6 +9,10 @@ type TUsers struct {
 }
 
 func (d *TUsers) TableName() string {
-	return "user_base_info"
+	return "users"
 }
 
+type LoginReq struct {
+	Name string 	`json:"name"`
+	Password string `json:"password"`
+}

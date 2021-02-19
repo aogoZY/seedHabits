@@ -5,6 +5,7 @@ import (
 	"os"
 	"seedHabits/sdk/dal"
 	"seedHabits/sdk/log"
+	"seedHabits/sdk/trace"
 )
 
 var Config = new(Conf)
@@ -15,7 +16,8 @@ type Conf struct {
 	LogConfig log.LoggerConfig   `toml:"logConfig"`
 	Server    Server             `toml:"server"`
 	Database  dal.DatabaseConfig `toml:"Database"`
-	Memcache  Memcache           `toml:"memcache"`
+	Memcache  Memcache           `toml:"Memcache"`
+	Tracer    trace.Config       `toml:"Tracer"`
 }
 
 type Server struct {
@@ -31,6 +33,9 @@ type Server struct {
 type Memcache struct {
 	CulsterInfo []string
 	Expire      int64
+}
+
+type Tracer struct {
 }
 
 func Init(cfgPath string) error {

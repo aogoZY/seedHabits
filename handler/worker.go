@@ -24,6 +24,7 @@ func (w *Worked) Init() error {
 	}
 	log.Init(conf.Config.LogConfig)
 	dao.Init()
+	dao.TracerInit()
 	w.Server = &Server{}
 	if err := w.Server.Init(); err != nil {
 		fmt.Println(err)

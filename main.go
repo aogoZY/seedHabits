@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	_ "seedHabits/docs"
 	"seedHabits/handler"
 	"seedHabits/sdk/log"
 	"syscall"
@@ -32,8 +33,8 @@ type program struct {
 func (p *program) Init(env svc.Environment) error {
 	// 检查是否是windows 服务。。。目测一般时候也用不到
 	p.env = env
-	if env.IsWindowsService(){
-		dir:=filepath.Dir(os.Args[0])
+	if env.IsWindowsService() {
+		dir := filepath.Dir(os.Args[0])
 		return os.Chdir(dir)
 	}
 	flagSet.Parse(os.Args[1:])
@@ -82,6 +83,10 @@ func (p *program) Reload(signal os.Signal) () {
 	}
 }
 
+//@title SeedHabits
+//@description seedHabits开发文档
+//@contact.name aogo
+//@contact.url localhost:8081
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	pg := &program{}
