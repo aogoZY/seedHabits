@@ -3,7 +3,7 @@ package encrypt
 import (
 	"bytes"
 	"crypto/aes"
-	"crypto/cipher"
+	"r"
 )
 
 const (
