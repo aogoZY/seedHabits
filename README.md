@@ -6,6 +6,8 @@
 
 使用jager做链路追踪，可在http://localhost:16686/search查看接口信息详情。
 
+使用了pprof做性能分析，可在http://localhost:8080/ui/source查看具体关注项指标。
+
 sdk里面集成了一些常用的三方库，比如加解密包、log日志包、redis使用demo、elasticsearch demo等。
 
 这个项目是仿照以前我用的一个app种子习惯写的，主要有三大模块。
